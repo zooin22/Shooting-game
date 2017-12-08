@@ -157,7 +157,7 @@ class BounceGun : Weapon
         base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
     {
         bullet = new BaseBullet(damage, bulletSpeed, range);
-        BulletStrategy bulletStrategy = new BouncedBulletStrategy(5);
+        BulletStrategy bulletStrategy = new BouncedBulletStrategy(2);
 
         bullet.SetBulletStrategy(bulletStrategy);
         strategyShot = new PlainShot(bullet);
@@ -195,7 +195,7 @@ class LaserGun : Weapon
         base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
     {
         bullet = new LineBullet(damage, bulletSpeed, range,0.1f);
-        BulletStrategy bulletStrategy = new NormalBulletStrategy();
+        BulletStrategy bulletStrategy = new BouncedBulletStrategy(1);
 
         bullet.SetBulletStrategy(bulletStrategy);
         strategyShot = new OnlyOneShot(bullet);

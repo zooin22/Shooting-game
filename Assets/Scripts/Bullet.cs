@@ -28,7 +28,7 @@ public abstract class Bullet
     {
         return range;
     }
-    public Vector3 Getdirection()
+    public virtual Vector3 Getdirection()
     {
         return direction;
     }
@@ -108,6 +108,8 @@ class LineBullet : Bullet // 레이저
 {
     LineRenderer line;
     float width;
+    int bounces;
+
     public LineBullet(int damage, float speed, float range, float width) : base(damage, speed, range)
     {
         this.width = width;
@@ -122,9 +124,9 @@ class LineBullet : Bullet // 레이저
     public override void SetProperties()
     {
         line = this.gameObject.GetComponent<LineRenderer>();
-        line.positionCount = 2;
         line.startWidth = width;
         line.startWidth = width;
+        bounces = bulletStrategy.Coliision();
     }
     public override void OnCollisionEnter2D(Collision2D coll)
     {
@@ -139,25 +141,76 @@ class LineBullet : Bullet // 레이저
         {
             return;
         }
-        RaycastHit2D[] hit;
-        Ray2D ray = new Ray2D(gameObject.transform.position, direction);
-        line.SetPosition(0, gameObject.transform.position);
+        bulletStrategy.InitMemberValue();
+        LaserBeam(gameObject.transform.position, direction, 0, range);
+    }
 
-        hit = Physics2D.RaycastAll(ray.origin,direction,range);
-        if(hit.Length == 0)
+    private void LaserBeam(Vector3 src, Vector3 dir, int count, float distance)
+    {
+        Vector2 position = src;
+        Vector2 direction = dir;
+        Vector2 lastPosition = position;
+        int vertCount = 1;
+        int bounceCount = 0;
+        bool loop = true;
+        line.positionCount = vertCount;
+        line.SetPosition(vertCount - 1, position);
+
+        while (loop)
         {
-            line.SetPosition(1, ray.GetPoint(range));
-        }
-        else
-        {
-            for (int i = 0; i < hit.Length; i++)
+            if (bounceCount >= bounces)
             {
-                if (hit[i].collider)
+                loop = false;
+            }
+            RaycastHit2D hit = Physics2D.Raycast(position, direction, distance);
+
+            if (hit == true)
+            {
+                //hit
+                Vector2 hitPosition = hit.point;
+                Vector2 hitNormal = hit.normal;
+                distance -= hit.distance;
+                position = hitPosition;
+
+                Wall wall = hit.collider.GetComponent<Wall>();
+                if (wall != null)
                 {
-                    line.SetPosition(1, hit[i].point);
+                    if (wall.reflect == false)
+                    {
+                        vertCount += 3;
+                        line.positionCount = vertCount;
+                        line.SetPosition(vertCount - 3, Vector2.MoveTowards(position, lastPosition, 0.001f));
+                        line.SetPosition(vertCount - 2, position);
+                        line.SetPosition(vertCount - 1, position);
+                        break;
+                    }
                 }
+
+                Vector2 reflection = Vector2.Reflect(direction, hitNormal);
+
+                direction = reflection;
+
+                bounceCount++;
+                vertCount += 3;
+                line.positionCount = vertCount;
+                line.SetPosition(vertCount - 3, Vector2.MoveTowards(position, lastPosition, 0.001f));
+                line.SetPosition(vertCount - 2, position);
+                line.SetPosition(vertCount - 1, position);
+
+                lastPosition = position;
+
+                position = position + direction * 0.001f;
+            }
+            else
+            {
+                // No hit
+                vertCount++;
+                line.positionCount = vertCount;
+                line.SetPosition(vertCount - 1, position + (direction * distance));
+                loop = false;
             }
         }
+         
+        #endregion
     }
-    #endregion
 }

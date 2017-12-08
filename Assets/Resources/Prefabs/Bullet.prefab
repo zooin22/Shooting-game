@@ -163,7 +163,7 @@ LineRenderer:
     textureMode: 0
     generateLightingData: 0
   m_UseWorldSpace: 1
-  m_Loop: 1
+  m_Loop: 0
 --- !u!212 &212495068635616094
 SpriteRenderer:
   m_ObjectHideFlags: 1
