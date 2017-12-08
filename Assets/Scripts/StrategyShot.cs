@@ -25,11 +25,11 @@ public abstract class StrategyShot : BaseObject
     }
     public virtual void InitBullet(GameObject bulletObj, Vector3 position,Vector3 direction, Quaternion rotation) // 총알 초기화
     {
-        Bullet mCBullet = bulletT.Clone(); // 총알 속성 스크립트
-        mCBullet.SetGameObject(bulletObj); // 총알 속성 스크립트에 총알 정보 전달
+        Bullet mBullet = bulletT.Clone(); // 총알 속성 스크립트
+        mBullet.SetGameObject(bulletObj); // 총알 속성 스크립트에 총알 정보 전달
         bulletObj.transform.position = position; // 총알 위지 설정
         bulletObj.transform.rotation = rotation; // 총알 각도 설정
-        bulletObj.AddComponent<Property>().SetBullet(mCBullet, direction, position); // 총알 발사.
+        bulletObj.AddComponent<Property>().SetBullet(mBullet, direction, position); // 총알 발사.
         bulletObj.SetActive(true); // 트루
     }
 }
@@ -118,15 +118,15 @@ class OnlyOneShot : StrategyShot // 기본 샷 1발짜리
     }
 
     public override void InitBullet(GameObject bulletObj, Vector3 position, Vector3 direction, Quaternion rotation) // 총알 초기화 Template Method
-    {   
-        Bullet mCBullet = bulletT.Clone(); // 총알 속성 스크립트
-        mCBullet.SetGameObject(bulletObj); // 총알 속성 스크립트에 총알 정보 전달
+    {
+        Bullet mBullet = bulletT.Clone(); // 총알 속성 스크립트
+        mBullet.SetGameObject(bulletObj); // 총알 속성 스크립트에 총알 정보 전달
         bulletObj.transform.position = position; // 총알 위치 설정
         bulletObj.transform.rotation = rotation; // 총알 각도 설정
         if (bulletObj.GetComponent<Property>() == null)
-            bulletObj.AddComponent<Property>().SetBullet(mCBullet, direction, position); // 총알 발사.
+            bulletObj.AddComponent<Property>().SetBullet(mBullet, direction, position); // 총알 발사.
         else
-            bulletObj.GetComponent<Property>().SetBullet(mCBullet, direction, position); // 총알 발사.
+            bulletObj.GetComponent<Property>().SetBullet(mBullet, direction, position); // 총알 발사.
         bulletObj.SetActive(true); // 트루
     }
     #endregion

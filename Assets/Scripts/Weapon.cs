@@ -80,7 +80,7 @@ public abstract class Weapon : BaseObject // 무기 클래스
     {
     }
     public virtual void MouseDown(Transform position, Vector3 dest) {
-        if (0 >= ammo || gunState != GunState.IDLE || gunState == GunState.SHOT)
+        if (0 >= ammo || gunState != GunState.IDLE)
             return;
         ammo--;
         RateOfFire();
@@ -90,7 +90,7 @@ public abstract class Weapon : BaseObject // 무기 클래스
     #region coroutine
     public virtual void RateOfFire()
     {
-        if (gunState == GunState.RELOAD || gunState == GunState.SHOT)
+        if (GunState.IDLE != gunState)
             return;
         gunState = GunState.SHOT;
         CoroutineManager.instance.RateOfFire(this);
@@ -98,7 +98,7 @@ public abstract class Weapon : BaseObject // 무기 클래스
 
     public void Reload()
     {
-        if (ammo == magazine || ammoCapacity <= 0)
+        if (GunState.IDLE != gunState || ammo == magazine || ammoCapacity <= 0)
             return;
         gunState = GunState.RELOAD;
         CoroutineManager.instance.Reload(this);
@@ -139,17 +139,13 @@ class BaseGun : Weapon
     public BaseGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire,float bulletSpeed) : 
         base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
     {
-        bullet = new NormalBullet(new BaseBullet(damage, bulletSpeed, range));
+        bullet = new BaseBullet(damage, bulletSpeed, range);
+        BulletStrategy bulletStrategy = new NormalBulletStrategy();
+        bullet.SetBulletStrategy(bulletStrategy);
         strategyShot = new PlainShot(bullet);
     }
 
     #region override
-    //public override void Shot(Transform _position, Vector3 _dest)
-    //{
-    //    if (0 >= ammo)
-    //        return;
-    //    strategyShot.Shot(_position, _dest); // StrategyShot에 따른 발사.
-    //}
     public override void MouseUp(Transform position, Vector3 dest) {
     }
     #endregion
@@ -160,17 +156,14 @@ class BounceGun : Weapon
     public BounceGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire,float bulletSpeed, int bounceTime) : 
         base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
     {
-        bullet = new BouncedBullet(new BaseBullet(damage, bulletSpeed, range), bounceTime);
+        bullet = new BaseBullet(damage, bulletSpeed, range);
+        BulletStrategy bulletStrategy = new BouncedBulletStrategy(5);
+
+        bullet.SetBulletStrategy(bulletStrategy);
         strategyShot = new PlainShot(bullet);
     }
 
     #region override
-    //public override void Shot(Transform _position, Vector3 _dest)
-    //{
-    //    if (0 >= ammo)
-    //        return;
-    //    strategyShot.Shot(_position, _dest); // StrategyShot에 따른 발사.
-    //}
     public override void MouseUp(Transform position, Vector3 dest)
     {
     }
@@ -182,17 +175,14 @@ class ShotGun : Weapon
     public ShotGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
         base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
     {
-        bullet = new NormalBullet(new BaseBullet(damage, bulletSpeed, range));
+        bullet = new BaseBullet(damage, bulletSpeed, range);
+        BulletStrategy bulletStrategy = new NormalBulletStrategy();
+
+        bullet.SetBulletStrategy(bulletStrategy);
         strategyShot = new SpreadShot(bullet,5,60);
     }
 
     #region override
-    //public override void Shot(Transform _position, Vector3 _dest)
-    //{
-    //    if (0 >= ammo)
-    //        return;
-    //    strategyShot.Shot(_position, _dest); // StrategyShot에 따른 발사.
-    //}
     public override void MouseUp(Transform position, Vector3 dest)
     {
     }
@@ -201,10 +191,13 @@ class ShotGun : Weapon
 
 class LaserGun : Weapon
 {
-    public LaserGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire , float bulletSpeed) : 
+    public LaserGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
         base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
     {
-        bullet = new LineBullet(new BouncedBullet(new BaseBullet(damage, bulletSpeed,range),5),0.1f);
+        bullet = new LineBullet(damage, bulletSpeed, range,0.1f);
+        BulletStrategy bulletStrategy = new NormalBulletStrategy();
+
+        bullet.SetBulletStrategy(bulletStrategy);
         strategyShot = new OnlyOneShot(bullet);
     }
 

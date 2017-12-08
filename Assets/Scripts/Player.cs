@@ -4,29 +4,20 @@ using UnityEngine;
 
 class Player : Charcter
 {
-    List<Weapon> weapons;
+    WeaponBag weaponBag;
     Weapon weapon;
 
     private void Start()
     {
         speed = 2f;
         state = State.IDLE;
-        weapons = new List<Weapon>();
-        weapons.Add(new NoWeapon(0,0,0,0,0,0,0));
-        weapons.Add(new BaseGun  (5, 50, 10, 1, 5, 1, 10));
-        weapons.Add(new BounceGun(5, 50, 10, 1, 5, 1, 10, 2));
-        weapons.Add(new ShotGun  (5, 50, 10, 1, 5, 2, 10));
-        weapons.Add(new LaserGun (5, 50, 1000, 1, 10, 0, 10));
-        weapon = weapons[0];
+        weaponBag = new WeaponBag(gameObject);
+        weaponBag.Add(new BaseGun  (5, 50, 10, 3, 10, 0.1f, 10));
+        weaponBag.Add(new BounceGun(5, 50, 10, 1, 10, 1, 10, 2));
+        weaponBag.Add(new ShotGun  (5, 50, 10, 1, 10, 2, 10));
+        weaponBag.Add(new LaserGun(5, 50, 10, 1, 10, 2, 10));
+        weapon = weaponBag.Init();
     }
-    public void SwapWeapon(int i)
-    {
-        if (i >= weapons.Count)
-            return;
-        weapon.Stop(transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)));
-        weapon = weapons[i];
-    }
-
     private void Roll(Vector3 direction)
     {
         StartCoroutine(RollRoutine(direction));
@@ -42,7 +33,7 @@ class Player : Charcter
         }
         state = State.IDLE; // Idle 상태 회복
     }
-#region override
+    #region override
     protected override void Move()
     {
         if (State.ROLL == state) // 구르고 있을 시 못 움직임.
@@ -73,23 +64,23 @@ class Player : Charcter
     }
     protected override void Action()
     {
-        if (Input.GetKey(KeyCode.Alpha1))
-            SwapWeapon(0);
-        if (Input.GetKey(KeyCode.Alpha2))
-            SwapWeapon(1);
-        if (Input.GetKey(KeyCode.Alpha3))
-            SwapWeapon(2);
-        if (Input.GetKey(KeyCode.Alpha4))
-            SwapWeapon(3);
-        if (Input.GetKey(KeyCode.Alpha5))
-            SwapWeapon(4);
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            weaponBag.SwapWeapon(ref weapon, 0);
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            weaponBag.SwapWeapon(ref weapon, 1);
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            weaponBag.SwapWeapon(ref weapon, 2);
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+            weaponBag.SwapWeapon(ref weapon, 3);
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+            weaponBag.SwapWeapon(ref weapon, 4);
 
-        if (Input.GetKey(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
             weapon.Reload();
     }
     protected override void Shot() // 미사일 발사
     {
-        if (State.ROLL == state) // 구르고 있을 시 발사 안됨.
+        if (State.ROLL == state || weapon.GetGunState() == GunState.RELOAD) // 구르고 있을 시, 재장전 시 발사 안됨.
             return;
         if (Input.GetMouseButton(0)) // 왼쪽 클릭
         {
@@ -100,7 +91,7 @@ class Player : Charcter
             weapon.MouseUp(this.transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0))); // Weapon에 현재 위치, 목표 위치 전달
         }
     }
-#endregion
+    #endregion
     private void Update()
     {
         Move();

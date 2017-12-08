@@ -8,15 +8,13 @@ class Property : BaseObject // cBullet 클래스가 Decorator Pattern이라 new 
     {
         this.bullet = bullet; // 총알 속성 스크립트
         this.bullet.SetBullet(direction, shotPos); // 총알 방향 초기화
-        this.bullet.SetProperties(); // 총알 개별 속성 초기화
+        SetProperties();
     }
 
-    //private void OnTriggerEnter2D(Collider2D coll)
-    //{
-    //    if (null == this.bullet || coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet"))// 플레이어 or bullet에는 충돌하지 않음
-    //        return;
-    //    this.bullet.OnCollisionEnter2D(coll);
-    //}
+    public void SetProperties()
+    {
+        this.bullet.SetProperties();
+    }
 
     private void OnCollisionEnter2D(Collision2D coll) // 충돌 시
     {
