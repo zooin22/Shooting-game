@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-class Player : Charcter
+public class Player : Charcter
 {
     WeaponBag weaponBag;
     Weapon weapon;
@@ -11,18 +11,18 @@ class Player : Charcter
     {
         speed = 2f;
         state = State.IDLE;
-        weaponBag = new WeaponBag(gameObject);
+        weaponBag = new WeaponBag(this);
         weaponBag.Add(new BaseGun  (5, 50, 10, 3, 10, 0.1f, 10));
         weaponBag.Add(new BounceGun(5, 50, 10, 1, 10, 1, 10, 2));
         weaponBag.Add(new ShotGun  (5, 50, 10, 1, 10, 2, 10));
-        weaponBag.Add(new LaserGun(5, 50, 10, 1, 100, 2, 10));
+        weaponBag.Add(new LaserGun(5, 50, 1000, 1, 50, 0, 10));
+        weaponBag.Add(new ChargeGun(5, 50, 1000, 1, 10, 2, 10));
         weapon = weaponBag.Init();
     }
     private void Roll(Vector3 direction)
     {
         StartCoroutine(RollRoutine(direction));
     } // 구르기
-
     IEnumerator RollRoutine(Vector3 direction) 
     {
         state = State.ROLL; // 구르기 상태 
@@ -33,6 +33,22 @@ class Player : Charcter
         }
         state = State.IDLE; // Idle 상태 회복
     }
+    private void Wheel()
+    {
+        float d = Input.GetAxis("Mouse ScrollWheel");
+        if (d > 0f)
+        {
+            weaponBag.WheelWeapon(true);
+        }
+        else if(d < -0f)
+        {
+            weaponBag.WheelWeapon(false);
+        }
+    }
+
+    public Weapon GetWeapon() { return weapon; }
+    public void SetWeapon(Weapon weapon) { this.weapon = weapon; }
+
     #region override
     protected override void Move()
     {
@@ -64,19 +80,9 @@ class Player : Charcter
     }
     protected override void Action()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-            weaponBag.SwapWeapon(ref weapon, 0);
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-            weaponBag.SwapWeapon(ref weapon, 1);
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-            weaponBag.SwapWeapon(ref weapon, 2);
-        if (Input.GetKeyDown(KeyCode.Alpha4))
-            weaponBag.SwapWeapon(ref weapon, 3);
-        if (Input.GetKeyDown(KeyCode.Alpha5))
-            weaponBag.SwapWeapon(ref weapon, 4);
-
         if (Input.GetKeyDown(KeyCode.R))
             weapon.Reload();
+        Wheel();
     }
     protected override void Shot() // 미사일 발사
     {

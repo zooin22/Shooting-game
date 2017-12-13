@@ -2,15 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-class WeaponBag 
+public class WeaponBag 
 {
     List<Weapon> weapons;
-    GameObject player;
-    public WeaponBag(GameObject player)
+    Player player;
+    private int currentIndex;
+    private float switchTime;
+    public WeaponBag(Player player)
     {
         this.player = player;
         weapons = new List<Weapon>();
         weapons.Add(new NoWeapon(0, 0, 0, 0, 0, 0, 0));
+        currentIndex = 0;
+        switchTime = 1;
     }
 
     public Weapon Init()
@@ -23,11 +27,31 @@ class WeaponBag
         weapons.Add(weapon);
     }
 
-    public void SwapWeapon(ref Weapon weapon,int i)
+    public void WheelWeapon(bool up)
     {
-        if (i >= weapons.Count || weapon.GetGunState() == GunState.RELOAD)
+        if (player.GetWeapon().GetGunState() == GunState.RELOAD || player.GetWeapon().GetGunState() == GunState.SWITCH)
             return;
-        weapon.MouseUp(player.transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0))); // Weapon에 현재 위치, 목표 위치 전달
-        weapon = weapons[i];
+        if (!up)
+        {
+            currentIndex++;
+            if (currentIndex >= weapons.Count)
+                currentIndex = 0;
+        }
+        else
+        {
+            currentIndex--;
+            if (currentIndex < 0)
+                currentIndex = weapons.Count - 1;
+        }
+        player.GetWeapon().SetGunState(GunState.SWITCH);
+        CoroutineManager.instance.SwitchWeapon(switchTime,this);
+        Debug.Log(currentIndex);
+    }
+
+    public void SwapWeapon()
+    {
+        player.GetWeapon().MouseUp(player.gameObject.transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0))); // Weapon에 현재 위치, 목표 위치 전달
+        player.SetWeapon(weapons[currentIndex]);
+        player.GetWeapon().SetGunState(GunState.IDLE);
     }
 }

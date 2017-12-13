@@ -1,6 +1,4 @@
-﻿//Decorator Pattern 사용
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,6 +32,10 @@ public abstract class Bullet
     }
     #endregion
     #region setter
+    public void SetChargeDamage(int i)
+    {
+        this.damage *= (i+1);
+    }
     public void SetDirection(Vector3 direction)
     {
         this.direction = direction;
@@ -46,6 +48,7 @@ public abstract class Bullet
     {
         this.gameObject = gameObject;
         bulletStrategy.SetGameObject(gameObject,this);
+
     }
     public void SetBullet(Vector3 direction,Vector3 shotPos) // 방향, 속도 초기화
     {
@@ -67,7 +70,7 @@ public abstract class Bullet
     }
     public void Remove() // 게임 풀 오브젝트 false
     {
-        ObjectPool.current.FreeObject(this.gameObject);
+        PoolGroup.instance.GetObjectPool(Pool.BULLET).FreeObject(this.gameObject);
     }
     public virtual void Update()
     {
@@ -107,17 +110,19 @@ class BaseBullet : Bullet // 노말 총알 - 데미지.
 class LineBullet : Bullet // 레이저
 {
     LineRenderer line;
+    int life;
     float width;
     int bounces;
 
-    public LineBullet(int damage, float speed, float range, float width) : base(damage, speed, range)
+    public LineBullet(int damage, float speed, float range, float width, int life) : base(damage, speed, range)
     {
         this.width = width;
+        this.life = life;
     }
     #region override
     public override Bullet Clone()
     {
-        Bullet clone = new LineBullet(damage, speed, range, width);
+        Bullet clone = new LineBullet(damage, speed, range, width,life);
         clone.SetBulletStrategy(bulletStrategy);
         return clone;
     }
@@ -127,7 +132,7 @@ class LineBullet : Bullet // 레이저
         line.startWidth = width;
         line.startWidth = width;
         bounces = bulletStrategy.Coliision();
-    }
+    }// 개별 속성 설정
     public override void OnCollisionEnter2D(Collision2D coll)
     {
         // If a missile hits this object
@@ -137,15 +142,17 @@ class LineBullet : Bullet // 레이저
     }
     public override void Update()
     {
-        if (!CheckDistance())
+        if (!CheckDistance() || life <= 0)
         {
+            Remove();
             return;
         }
+        life--;
         bulletStrategy.InitMemberValue();
-        LaserBeam(gameObject.transform.position, direction, 0, range);
+        LaserBeam(gameObject.transform.position, direction, range);
     }
-
-    private void LaserBeam(Vector3 src, Vector3 dir, int count, float distance)
+    #endregion
+    private void LaserBeam(Vector3 src, Vector3 dir, float distance)
     {
         Vector2 position = src;
         Vector2 direction = dir;
@@ -155,7 +162,6 @@ class LineBullet : Bullet // 레이저
         bool loop = true;
         line.positionCount = vertCount;
         line.SetPosition(vertCount - 1, position);
-
         while (loop)
         {
             if (bounceCount >= bounces)
@@ -173,7 +179,7 @@ class LineBullet : Bullet // 레이저
                 position = hitPosition;
 
                 Wall wall = hit.collider.GetComponent<Wall>();
-                if (wall != null)
+                if (wall != null)// 벽과 충돌했을 때
                 {
                     if (wall.reflect == false)
                     {
@@ -184,22 +190,34 @@ class LineBullet : Bullet // 레이저
                         line.SetPosition(vertCount - 1, position);
                         break;
                     }
+                    Vector2 reflection = Vector2.Reflect(direction, hitNormal);
+
+                    direction = reflection;
+
+                    bounceCount++;
+                    vertCount += 3;
+                    line.positionCount = vertCount;
+                    line.SetPosition(vertCount - 3, Vector2.MoveTowards(position, lastPosition, 0.001f));
+                    line.SetPosition(vertCount - 2, position);
+                    line.SetPosition(vertCount - 1, position);
+
+                    lastPosition = position;
+
+                    position = position + direction * 0.001f;
                 }
+                else// 벽이 아닌 것과 충돌 했을 때
+                {
+          
+                    vertCount += 3;
+                    line.positionCount = vertCount;
+                    line.SetPosition(vertCount - 3, Vector2.MoveTowards(position, lastPosition, 0.001f));
+                    line.SetPosition(vertCount - 2, position);
+                    line.SetPosition(vertCount - 1, position);
 
-                Vector2 reflection = Vector2.Reflect(direction, hitNormal);
+                    lastPosition = position;
 
-                direction = reflection;
-
-                bounceCount++;
-                vertCount += 3;
-                line.positionCount = vertCount;
-                line.SetPosition(vertCount - 3, Vector2.MoveTowards(position, lastPosition, 0.001f));
-                line.SetPosition(vertCount - 2, position);
-                line.SetPosition(vertCount - 1, position);
-
-                lastPosition = position;
-
-                position = position + direction * 0.001f;
+                    position = position + direction * 0.001f;
+                }
             }
             else
             {
@@ -210,7 +228,6 @@ class LineBullet : Bullet // 레이저
                 loop = false;
             }
         }
-         
-        #endregion
     }
+
 }

@@ -14,13 +14,13 @@ public abstract class BulletStrategy
 
     public void Remove() // 게임 풀 오브젝트 false
     {
-        ObjectPool.current.FreeObject(gameObject);
+        PoolGroup.instance.GetObjectPool(Pool.BULLET).FreeObject(gameObject);
     }
 
     public abstract BulletStrategy Clone();
     public virtual void InitMemberValue() { }
     public abstract void Coliision(ref Collision2D coll);
-    public virtual int Coliision() { return 1; }
+    public virtual int Coliision() { return 0; }
 }
 
 class NormalBulletStrategy : BulletStrategy // 노말 총알 - 아무 능력 없음.

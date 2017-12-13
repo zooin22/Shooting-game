@@ -18,20 +18,22 @@ public abstract class StrategyShot : BaseObject
         direction = (new Vector3(dest.x, dest.y, 0) - center.position).normalized;
         lookRotation = BulletCal.GetRotFromVector(direction);
     }
-
     public virtual void ShotEnd(Transform center, Vector3 dest)
     {
 
     }
-    public virtual void InitBullet(GameObject bulletObj, Vector3 position,Vector3 direction, Quaternion rotation) // 총알 초기화
+    public void InitBullet(GameObject bulletObj, Vector3 position,Vector3 direction, Quaternion rotation) // 총알 초기화
     {
-        Bullet mBullet = bulletT.Clone(); // 총알 속성 스크립트
-        mBullet.SetGameObject(bulletObj); // 총알 속성 스크립트에 총알 정보 전달
+        Bullet bullet = bulletT.Clone(); // 총알 속성 스크립트
+        bullet.SetGameObject(bulletObj); // 총알 속성 스크립트에 총알 정보 전달
         bulletObj.transform.position = position; // 총알 위지 설정
         bulletObj.transform.rotation = rotation; // 총알 각도 설정
-        bulletObj.AddComponent<Property>().SetBullet(mBullet, direction, position); // 총알 발사.
+        bulletObj.transform.localScale = new Vector3(1, 1, 0);
+        bulletObj.AddComponent<Property>().SetBullet(bullet, direction, position); // 총알 발사.
         bulletObj.SetActive(true); // 트루
+        SubInitBullet(bullet, bulletObj);
     }
+    protected abstract void SubInitBullet(Bullet bullet, GameObject bulletObj);
 }
 
 class PlainShot : StrategyShot // 기본 샷 1발짜리
@@ -40,15 +42,18 @@ class PlainShot : StrategyShot // 기본 샷 1발짜리
     {
     }
 
-#region override
+    #region override
+    protected override void SubInitBullet(Bullet bullet, GameObject bulletObj)
+    {
+    }
     public override void ShotStart(Transform center, Vector3 dest) //발사
     {
         base.ShotStart(center, dest);
-        GameObject bullet = ObjectPool.current.GetPooledObject();
+        GameObject bullet = PoolGroup.instance.GetObjectPool(Pool.BULLET).GetPooledObject();
         if (bullet == null || bullet.GetComponent<Property>() != null) return;
         InitBullet(bullet, center.position, direction, lookRotation);
     }
-#endregion
+    #endregion
 }
 
 class SpreadShot : StrategyShot // 퍼치는 샷 num발 짜리 angle각도
@@ -62,7 +67,10 @@ class SpreadShot : StrategyShot // 퍼치는 샷 num발 짜리 angle각도
         this.angle = angle;
     }
 
-#region override
+    #region override
+    protected override void SubInitBullet(Bullet bullet, GameObject bulletObj)
+    {
+    }
     public override void ShotStart(Transform center, Vector3 dest)//발사
     {
         base.ShotStart(center, dest);
@@ -73,61 +81,52 @@ class SpreadShot : StrategyShot // 퍼치는 샷 num발 짜리 angle각도
             Vector3 directionR = BulletCal.VectorRotate(direction, shotAngle); // angle만큼 회전된 값.
             Quaternion lookRotationR = BulletCal.GetRotFromVector(directionR);
 
-            GameObject bullet = ObjectPool.current.GetPooledObject();
+            GameObject bullet = PoolGroup.instance.GetObjectPool(Pool.BULLET).GetPooledObject();
             if (bullet == null || bullet.GetComponent<Property>() != null) return;
             InitBullet(bullet, center.position, directionR, lookRotationR);
             shotAngle += addAngle;
         }
     }
-#endregion
+    #endregion
 }
 
-class OnlyOneShot : StrategyShot // 기본 샷 1발짜리
+class ChargeShot : StrategyShot // 기본 샷 1발짜리
 {
-    GameObject bullet;
-    Vector3 oldCenter;
-    Vector3 oldDirection;
-    public OnlyOneShot(Bullet bullet) : base(ref bullet)
+    float charged;
+    int maxCharged;
+    bool isCharge;
+
+    public ChargeShot(Bullet bullet,int maxCharged) : base(ref bullet)
     {
+        this.charged = 1;
+        this.maxCharged = maxCharged;
+        this.isCharge = false;
     }
 
     #region override
+    protected override void SubInitBullet(Bullet bullet, GameObject bulletObj)
+    {
+        bullet.SetChargeDamage((int)charged);
+        bulletObj.transform.localScale *= (int)charged;
+    }
     public override void ShotStart(Transform center, Vector3 dest) //발사
     {
-        base.ShotStart(center, dest);
-        if (bullet == null)
-        {
-            oldCenter = center.position;
-            oldDirection = dest;
-            bullet = ObjectPool.current.GetPooledObject();
-            if (bullet == null) return;
-            InitBullet(bullet, center.position, direction, lookRotation);
-        }
-        if (oldDirection != dest || oldCenter != center.position)
-        {
-            InitBullet(bullet, center.position, direction, lookRotation);
-        }
+        charged += Time.deltaTime;
+        if (maxCharged <= charged)
+            charged = maxCharged;
+        isCharge = true;
     }
-    public override void ShotEnd(Transform center, Vector3 dest) //발사
+    public override void ShotEnd(Transform center, Vector3 dest)
     {
-        if (bullet != null)
+        if (isCharge)
         {
-            ObjectPool.current.FreeObject(bullet);
-            bullet = null;
+            base.ShotStart(center, dest);
+            GameObject bullet = PoolGroup.instance.GetObjectPool(Pool.BULLET).GetPooledObject();
+            if (bullet == null || bullet.GetComponent<Property>() != null) return;
+            InitBullet(bullet, center.position, direction, lookRotation);
+            charged = 1;
+            isCharge = false;
         }
-    }
-
-    public override void InitBullet(GameObject bulletObj, Vector3 position, Vector3 direction, Quaternion rotation) // 총알 초기화 Template Method
-    {
-        Bullet mBullet = bulletT.Clone(); // 총알 속성 스크립트
-        mBullet.SetGameObject(bulletObj); // 총알 속성 스크립트에 총알 정보 전달
-        bulletObj.transform.position = position; // 총알 위치 설정
-        bulletObj.transform.rotation = rotation; // 총알 각도 설정
-        if (bulletObj.GetComponent<Property>() == null)
-            bulletObj.AddComponent<Property>().SetBullet(mBullet, direction, position); // 총알 발사.
-        else
-            bulletObj.GetComponent<Property>().SetBullet(mBullet, direction, position); // 총알 발사.
-        bulletObj.SetActive(true); // 트루
     }
     #endregion
 }

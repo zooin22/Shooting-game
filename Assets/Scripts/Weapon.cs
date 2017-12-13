@@ -2,7 +2,7 @@
 using System.Collections;
 
 public enum ShotType { CHARGED, SEMIAUTOMATIC, AUTOMATIC, BURST }
-public enum GunState { IDLE, SHOT, RELOAD, CHARGE }
+public enum GunState { IDLE, SHOT, RELOAD, CHARGE, SWITCH }
 
 public abstract class Weapon : BaseObject // 무기 클래스
 {
@@ -27,9 +27,9 @@ public abstract class Weapon : BaseObject // 무기 클래스
     {
         ammoCapacity--;
     }
-    public void SetGunState()
+    public void SetGunState(GunState gunState)
     {
-        gunState = GunState.IDLE;
+        this.gunState = gunState;
     }
     #endregion
     #region getter
@@ -90,12 +90,9 @@ public abstract class Weapon : BaseObject // 무기 클래스
     #region coroutine
     public virtual void RateOfFire()
     {
-        if (GunState.IDLE != gunState)
-            return;
         gunState = GunState.SHOT;
         CoroutineManager.instance.RateOfFire(this);
     }
-
     public void Reload()
     {
         if (GunState.IDLE != gunState || ammo == magazine || ammoCapacity <= 0)
@@ -111,7 +108,6 @@ public abstract class Weapon : BaseObject // 무기 클래스
     //    ammo = magazine;
     //    gunState = GunState.IDLE;
     //}
-
 }
 
 class NoWeapon : Weapon
@@ -194,23 +190,52 @@ class LaserGun : Weapon
     public LaserGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
         base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
     {
-        bullet = new LineBullet(damage, bulletSpeed, range,0.1f);
-        BulletStrategy bulletStrategy = new BouncedBulletStrategy(1);
+        bullet = new LineBullet(damage, bulletSpeed, range, 0.1f, 1);
+        BulletStrategy bulletStrategy = new BouncedBulletStrategy(2);
 
         bullet.SetBulletStrategy(bulletStrategy);
-        strategyShot = new OnlyOneShot(bullet);
+        strategyShot = new PlainShot(bullet);
     }
 
     #region override
-    public override void Stop(Transform position, Vector3 dest)
-    {
-        strategyShot.ShotEnd(position, dest); // StrategyShot에 따른 발사.
-    }
     public override void MouseDown(Transform position, Vector3 dest)
     {
-        if (0 >= ammo || gunState != GunState.IDLE || gunState == GunState.RELOAD)
+        if (0 >= ammo || gunState != GunState.IDLE)
             return;
+        ammo--;
         strategyShot.ShotStart(position, dest); // StrategyShot에 따른 발사.
+    }
+    public override void Stop(Transform position, Vector3 dest)
+    {
+    }
+    public override void MouseUp(Transform position, Vector3 dest)
+    {
+    }
+    #endregion
+}
+
+class ChargeGun : Weapon
+{
+    public ChargeGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
+        base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
+    {
+        bullet = new BaseBullet(damage, bulletSpeed, range);
+        BulletStrategy bulletStrategy = new NormalBulletStrategy();
+
+        bullet.SetBulletStrategy(bulletStrategy);
+        strategyShot = new ChargeShot(bullet,2);
+    }
+
+    #region override
+    public override void MouseDown(Transform position, Vector3 dest)
+    {
+        if (0 >= ammo || gunState == GunState.SHOT || gunState == GunState.RELOAD || gunState == GunState.SWITCH)
+            return;
+        ammo--;
+        strategyShot.ShotStart(position, dest); // StrategyShot에 따른 발사.
+    }
+    public override void Stop(Transform position, Vector3 dest)
+    {
     }
     public override void MouseUp(Transform position, Vector3 dest)
     {
