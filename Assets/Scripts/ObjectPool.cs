@@ -20,6 +20,12 @@ public class ObjectPool : MonoBehaviour { // 오브젝트 풀링을 위한 클�
             pooledObjects.Add(obj);
         }
 	}
+
+    public List<GameObject> GetList()
+    {
+        return pooledObjects;
+    }
+
     public GameObject GetPooledObject() // Pool에서 오브젝트 가져오기
     {
         for(int i = 0; i < pooledObjects.Count; i++)
@@ -45,6 +51,7 @@ public class ObjectPool : MonoBehaviour { // 오브젝트 풀링을 위한 클�
         gameObject.SetActive(false);
         DestroyComponent(gameObject);
     }
+
     public void DestroyComponent(GameObject gameObject)
     {
         if (gameObject.GetComponent<Property>() != null)

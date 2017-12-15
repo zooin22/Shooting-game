@@ -44,13 +44,13 @@ public class WeaponBag
                 currentIndex = weapons.Count - 1;
         }
         player.GetWeapon().SetGunState(GunState.SWITCH);
+        player.GetWeapon().MouseUp(player.gameObject.transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0))); // Weapon에 현재 위치, 목표 위치 전달
         CoroutineManager.instance.SwitchWeapon(switchTime,this);
         Debug.Log(currentIndex);
     }
 
     public void SwapWeapon()
     {
-        player.GetWeapon().MouseUp(player.gameObject.transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0))); // Weapon에 현재 위치, 목표 위치 전달
         player.SetWeapon(weapons[currentIndex]);
         player.GetWeapon().SetGunState(GunState.IDLE);
     }

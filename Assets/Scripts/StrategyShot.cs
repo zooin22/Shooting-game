@@ -2,14 +2,14 @@
 
 using UnityEngine;
 
-public abstract class StrategyShot : BaseObject
+public abstract class ShotStrategy : BaseObject
 {
     protected Vector3 direction; // 총알 박향 벡터
     protected Quaternion lookRotation; // 총알 방향으로 이미지 회전
     protected Bullet bulletT;// 총알 타입
     protected float speed = 5; // 총알 속도
     
-    public StrategyShot(ref Bullet bulletT) //생성자
+    public ShotStrategy(ref Bullet bulletT) //생성자
     {
         this.bulletT = bulletT;
     }
@@ -36,7 +36,7 @@ public abstract class StrategyShot : BaseObject
     protected abstract void SubInitBullet(Bullet bullet, GameObject bulletObj);
 }
 
-class PlainShot : StrategyShot // 기본 샷 1발짜리
+class PlainShot : ShotStrategy // 기본 샷 1발짜리
 {
     public PlainShot(Bullet bullet) : base(ref bullet)
     {
@@ -56,7 +56,7 @@ class PlainShot : StrategyShot // 기본 샷 1발짜리
     #endregion
 }
 
-class SpreadShot : StrategyShot // 퍼치는 샷 num발 짜리 angle각도
+class SpreadShot : ShotStrategy // 퍼치는 샷 num발 짜리 angle각도
 { 
     private int num = 4; // 발사 갯수
     private float angle = 60f; // 발사 각도
@@ -90,7 +90,7 @@ class SpreadShot : StrategyShot // 퍼치는 샷 num발 짜리 angle각도
     #endregion
 }
 
-class ChargeShot : StrategyShot // 기본 샷 1발짜리
+class ChargeShot : ShotStrategy // 기본 샷 1발짜리
 {
     float charged;
     int maxCharged;

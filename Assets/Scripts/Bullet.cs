@@ -4,14 +4,13 @@ using UnityEngine;
 
 public abstract class Bullet
 {
-    public GameObject gameObject;
+    protected GameObject gameObject;
     protected BulletStrategy bulletStrategy;
     protected int damage; // 데미지
     protected float speed; // 속도
     protected float range; // 사거리
     protected Vector3 direction; // 방향
     protected Vector3 shotPos; // 시작 벡터
-    protected List<Bullet> properties;
 
     #region getter
     public GameObject GetGameObject()
@@ -72,15 +71,15 @@ public abstract class Bullet
     {
         PoolGroup.instance.GetObjectPool(Pool.BULLET).FreeObject(this.gameObject);
     }
+    #region override
+    public abstract Bullet Clone();
+    public abstract void SetProperties();
     public virtual void Update()
     {
         if (!CheckDistance())
             Remove();
         gameObject.transform.position = gameObject.transform.position + direction * speed * Time.deltaTime; // direction 벡터로 speed * Time.deltaTime 만큼 이동
     }
-    #region override
-    public abstract Bullet Clone();
-    public abstract void SetProperties();
     public abstract void OnCollisionEnter2D(Collision2D coll);
     #endregion
 }
@@ -113,6 +112,7 @@ class LineBullet : Bullet // 레이저
     int life;
     float width;
     int bounces;
+    bool isPierce;
 
     public LineBullet(int damage, float speed, float range, float width, int life) : base(damage, speed, range)
     {
@@ -132,6 +132,18 @@ class LineBullet : Bullet // 레이저
         line.startWidth = width;
         line.startWidth = width;
         bounces = bulletStrategy.Coliision();
+        switch (bounces) // BulletStrategy
+        {
+            case -1: // 관통 탄이면
+                isPierce = true;
+                break;
+            case 0:// 노말 탄이면
+                isPierce = false;
+                break;
+            default:
+                isPierce = false;
+                break;
+        }
     }// 개별 속성 설정
     public override void OnCollisionEnter2D(Collision2D coll)
     {
@@ -162,12 +174,8 @@ class LineBullet : Bullet // 레이저
         bool loop = true;
         line.positionCount = vertCount;
         line.SetPosition(vertCount - 1, position);
-        while (loop)
-        {
-            if (bounceCount >= bounces)
-            {
-                loop = false;
-            }
+        do
+        {          
             RaycastHit2D hit = Physics2D.Raycast(position, direction, distance);
 
             if (hit == true)
@@ -204,10 +212,14 @@ class LineBullet : Bullet // 레이저
                     lastPosition = position;
 
                     position = position + direction * 0.001f;
+                    if (bounceCount > bounces)
+                    {
+                        loop = false;
+                    }
                 }
                 else// 벽이 아닌 것과 충돌 했을 때
                 {
-          
+
                     vertCount += 3;
                     line.positionCount = vertCount;
                     line.SetPosition(vertCount - 3, Vector2.MoveTowards(position, lastPosition, 0.001f));
@@ -217,6 +229,10 @@ class LineBullet : Bullet // 레이저
                     lastPosition = position;
 
                     position = position + direction * 0.001f;
+                    if(!isPierce) //통과 기능이 없을때
+                    {
+                        loop = false;
+                    }
                 }
             }
             else
@@ -227,7 +243,7 @@ class LineBullet : Bullet // 레이저
                 line.SetPosition(vertCount - 1, position + (direction * distance));
                 loop = false;
             }
-        }
+        } while (loop);
     }
 
 }

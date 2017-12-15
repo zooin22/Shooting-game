@@ -45,10 +45,8 @@ public class Player : Charcter
             weaponBag.WheelWeapon(false);
         }
     }
-
     public Weapon GetWeapon() { return weapon; }
     public void SetWeapon(Weapon weapon) { this.weapon = weapon; }
-
     #region override
     protected override void Move()
     {
@@ -66,7 +64,6 @@ public class Player : Charcter
         if (Input.GetKeyDown(KeyCode.Space)) // 구르기
         {
             Roll(transform.position - oldPos);
-            weapon.Stop(transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)));
             return;
         }
         if (oldPos == transform.position) // 움직이지 않을 시 

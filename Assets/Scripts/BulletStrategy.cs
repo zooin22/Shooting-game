@@ -37,7 +37,31 @@ class NormalBulletStrategy : BulletStrategy // 노말 총알 - 아무 능력 없
         if (coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
             return;
         Remove(); // 충돌 시 삭제
-        return;
+    }
+    public override int Coliision()
+    {         // If a missile hits this object
+        return 0;
+    }
+    #endregion
+}
+
+class PierceBulletStrategy : BulletStrategy // 노말 총알 - 아무 능력 없음.
+{
+    #region override
+    public override BulletStrategy Clone()
+    {
+        BulletStrategy bulletStrategy = new PierceBulletStrategy();
+        return bulletStrategy;
+    }
+    public override void Coliision(ref Collision2D coll)
+    {
+        // If a missile hits this object
+        if (coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
+            return;
+    }
+    public override int Coliision()
+    {         // If a missile hits this object
+        return -1;
     }
     #endregion
 }
