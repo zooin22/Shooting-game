@@ -14,9 +14,9 @@ public class Player : Charcter
         weaponBag = new WeaponBag(this);
         weaponBag.Add(new BaseGun  (5, 50, 10, 3, 10, 0.1f, 10));
         weaponBag.Add(new BounceGun(5, 50, 10, 1, 10, 1, 10, 2));
-        weaponBag.Add(new ShotGun  (5, 50, 10, 1, 10, 2, 10));
-        weaponBag.Add(new LaserGun(5, 50, 1000, 1, 50, 0, 10));
+        weaponBag.Add(new ShotGun(5, 50, 10, 1, 10, 2, 10));
         weaponBag.Add(new ChargeGun(5, 50, 1000, 1, 10, 2, 10));
+        //weaponBag.Add(new LaserGun(5, 50, 1000, 1, 50, 0, 10));
         weapon = weaponBag.Init();
     }
     private void Roll(Vector3 direction)

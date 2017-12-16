@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.2.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -222,7 +224,7 @@
     <Compile Include="Assets\Scripts\BaseObject.cs" />
     <Compile Include="Assets\Scripts\Bullet.cs" />
     <Compile Include="Assets\Scripts\BulletCal.cs" />
-    <Compile Include="Assets\Scripts\BulletStrategy.cs" />
+    <Compile Include="Assets\Scripts\BulletProperty.cs" />
     <Compile Include="Assets\Scripts\Charcter.cs" />
     <Compile Include="Assets\Scripts\CoroutineManager.cs" />
     <Compile Include="Assets\Scripts\Enemy.cs" />
@@ -231,8 +233,8 @@
     <Compile Include="Assets\Scripts\ObjectPool.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\PoolGroup.cs" />
-    <Compile Include="Assets\Scripts\Property.cs" />
-    <Compile Include="Assets\Scripts\StrategyShot.cs" />
+    <Compile Include="Assets\Scripts\BulletWrapper.cs" />
+    <Compile Include="Assets\Scripts\ShotMode.cs" />
     <Compile Include="Assets\Scripts\Wall.cs" />
     <Compile Include="Assets\Scripts\Weapon.cs" />
     <Compile Include="Assets\Scripts\WeaponBag.cs" />

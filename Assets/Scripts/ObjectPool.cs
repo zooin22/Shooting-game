@@ -30,7 +30,7 @@ public class ObjectPool : MonoBehaviour { // 오브젝트 풀링을 위한 클�
     {
         for(int i = 0; i < pooledObjects.Count; i++)
         {
-            if (!pooledObjects[i].activeInHierarchy && pooledObjects[i].GetComponent<Property>() == null)
+            if (!pooledObjects[i].activeInHierarchy && pooledObjects[i].GetComponent<BulletWrapper>() == null)
             {
                 return pooledObjects[i];
             }
@@ -54,8 +54,8 @@ public class ObjectPool : MonoBehaviour { // 오브젝트 풀링을 위한 클�
 
     public void DestroyComponent(GameObject gameObject)
     {
-        if (gameObject.GetComponent<Property>() != null)
-            gameObject.GetComponent<Property>().Destroy();
+        if (gameObject.GetComponent<BulletWrapper>() != null)
+            gameObject.GetComponent<BulletWrapper>().Destroy();
         if(gameObject.GetComponent<LineRenderer>() != null)
             gameObject.GetComponent<LineRenderer>().positionCount = 0;
     }

@@ -2,14 +2,14 @@
 
 using UnityEngine;
 
-public abstract class ShotStrategy : BaseObject
+public abstract class ShotMode : BaseObject
 {
     protected Vector3 direction; // 총알 박향 벡터
     protected Quaternion lookRotation; // 총알 방향으로 이미지 회전
     protected Bullet bulletT;// 총알 타입
     protected float speed = 5; // 총알 속도
     
-    public ShotStrategy(ref Bullet bulletT) //생성자
+    public ShotMode(ref Bullet bulletT) //생성자
     {
         this.bulletT = bulletT;
     }
@@ -29,16 +29,16 @@ public abstract class ShotStrategy : BaseObject
         bulletObj.transform.position = position; // 총알 위지 설정
         bulletObj.transform.rotation = rotation; // 총알 각도 설정
         bulletObj.transform.localScale = new Vector3(1, 1, 0);
-        bulletObj.AddComponent<Property>().SetBullet(bullet, direction, position); // 총알 발사.
+        bulletObj.AddComponent<BulletWrapper>().SetBullet(bullet, direction, position); // 총알 발사.
         bulletObj.SetActive(true); // 트루
         SubInitBullet(bullet, bulletObj);
     }
     protected abstract void SubInitBullet(Bullet bullet, GameObject bulletObj);
 }
 
-class PlainShot : ShotStrategy // 기본 샷 1발짜리
+class SingleShot: ShotMode // 기본 샷 1발짜리
 {
-    public PlainShot(Bullet bullet) : base(ref bullet)
+    public SingleShot(Bullet bullet) : base(ref bullet)
     {
     }
 
@@ -50,13 +50,13 @@ class PlainShot : ShotStrategy // 기본 샷 1발짜리
     {
         base.ShotStart(center, dest);
         GameObject bullet = PoolGroup.instance.GetObjectPool(Pool.BULLET).GetPooledObject();
-        if (bullet == null || bullet.GetComponent<Property>() != null) return;
+        if (bullet == null || bullet.GetComponent<BulletWrapper>() != null) return;
         InitBullet(bullet, center.position, direction, lookRotation);
     }
     #endregion
 }
 
-class SpreadShot : ShotStrategy // 퍼치는 샷 num발 짜리 angle각도
+class SpreadShot : ShotMode // 퍼치는 샷 num발 짜리 angle각도
 { 
     private int num = 4; // 발사 갯수
     private float angle = 60f; // 발사 각도
@@ -82,7 +82,7 @@ class SpreadShot : ShotStrategy // 퍼치는 샷 num발 짜리 angle각도
             Quaternion lookRotationR = BulletCal.GetRotFromVector(directionR);
 
             GameObject bullet = PoolGroup.instance.GetObjectPool(Pool.BULLET).GetPooledObject();
-            if (bullet == null || bullet.GetComponent<Property>() != null) return;
+            if (bullet == null || bullet.GetComponent<BulletWrapper>() != null) return;
             InitBullet(bullet, center.position, directionR, lookRotationR);
             shotAngle += addAngle;
         }
@@ -90,7 +90,7 @@ class SpreadShot : ShotStrategy // 퍼치는 샷 num발 짜리 angle각도
     #endregion
 }
 
-class ChargeShot : ShotStrategy // 기본 샷 1발짜리
+class ChargeShot : ShotMode // 기본 샷 1발짜리
 {
     float charged;
     int maxCharged;
@@ -122,7 +122,7 @@ class ChargeShot : ShotStrategy // 기본 샷 1발짜리
         {
             base.ShotStart(center, dest);
             GameObject bullet = PoolGroup.instance.GetObjectPool(Pool.BULLET).GetPooledObject();
-            if (bullet == null || bullet.GetComponent<Property>() != null) return;
+            if (bullet == null || bullet.GetComponent<BulletWrapper >() != null) return;
             InitBullet(bullet, center.position, direction, lookRotation);
             charged = 1;
             isCharge = false;
