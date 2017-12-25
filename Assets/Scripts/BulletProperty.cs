@@ -1,44 +1,132 @@
 ﻿using UnityEngine;
 
+[System.Serializable]
 public abstract class BulletProperty
 {
-    protected GameObject bulletObj;
-    protected Bullet bullet;
+    public GameObject bulletObj;
+    public Bullet bullet;
 
-    public void Init(GameObject bulletObj, Bullet bullet) { this.bulletObj = bulletObj; this.bullet = bullet; }
-    public abstract CollisionProperty Clone();
+    public virtual void Init(GameObject bulletObj, Bullet bullet) { this.bulletObj = bulletObj; this.bullet = bullet; }
 }
 
 public abstract class UpdateProperty : BulletProperty
 {
+    public abstract void Init();
+    public abstract UpdateProperty Clone();
     public abstract void Update();
+}
+
+class BaseNormalUpdateProperty : UpdateProperty
+{
+    private float speed;
+
+    public override void Init()
+    {
+        base.Init(bulletObj,bullet);
+        this.speed = bullet.GetSpeed();
+    }
+    public override UpdateProperty Clone()
+    {
+        return new BaseNormalUpdateProperty();
+    }
+    public override void Update()
+    {
+        bulletObj.transform.Translate(Vector3.down * Time.deltaTime * speed); // direction 벡터로 speed * Time.deltaTime 만큼 이동
+    }
+}
+
+class HomingProperty : UpdateProperty
+{
+    WeaponState.Owner owner;
+    ObjectPool objectPool;
+    private float rocketTurnSpeed;
+    private float timerSinceLaunch;
+    public HomingProperty()
+    {
+        rocketTurnSpeed = 50.0f;
+        timerSinceLaunch = 0;
+    }
+    public override void Init()
+    {
+        base.Init(bulletObj, bullet);
+        owner = bullet.GetOwner();
+        if (WeaponState.Owner.PLAYER == owner)
+        {
+            objectPool = PoolGroup.instance.GetObjectPool(Pool.ENEMY);
+        }
+        else
+        {
+            objectPool = null;
+        }
+    }
+    public override UpdateProperty Clone()
+    {
+        return new HomingProperty();
+    }
+    public override void Update()
+    {
+        timerSinceLaunch += Time.deltaTime;
+        Vector3 directionTarget = objectPool.GetNeareastObject(bulletObj.transform.position);
+        if (timerSinceLaunch > 1)
+        {
+            if (directionTarget.sqrMagnitude > 50)
+            {
+                rocketTurnSpeed = 90.0f;
+            }
+            else
+            {
+                //if close to target
+                if (directionTarget.sqrMagnitude < 10)
+                {
+                    rocketTurnSpeed = 360.0f;
+                }
+            }
+        }
+        directionTarget.Normalize();
+        bulletObj.transform.rotation = Quaternion.RotateTowards(bulletObj.transform.rotation, BulletCal.GetRotFromVector(directionTarget), Time.deltaTime * rocketTurnSpeed * timerSinceLaunch);
+    }
 }
 
 public abstract class CollisionProperty : BulletProperty
 {
+    public abstract CollisionProperty Clone();
     public abstract void Collision(ref Collision2D coll);
 }
 
-class NormalProperty : CollisionProperty
+class BaseNormalCollisionProperty : CollisionProperty
 {
     public override CollisionProperty Clone()
     {
-        return new NormalProperty();
+        return new BaseNormalCollisionProperty();
+    }
+    public override void Collision(ref Collision2D coll)
+    {
+        // If a missile hits this object
+        if (coll.transform.CompareTag("Item") || coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
+            return;
+        bullet.Remove();
+    }
+}
+
+class BasePierceProperty : CollisionProperty
+{
+    public override CollisionProperty Clone()
+    {
+        return new BasePierceProperty();
     }
     public override void Collision(ref Collision2D coll)
     {
         // If a missile hits this object
         if (coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
             return;
-        bullet.Remove();
     }
 }
 
-class BouncyProperty : CollisionProperty
+class BaseBouncyProperty : CollisionProperty
 {
     int bounceCount;
     int bounces;
-    public BouncyProperty()
+    public BaseBouncyProperty()
     {
         bounces = 2;
         bounceCount = 0;
@@ -46,12 +134,12 @@ class BouncyProperty : CollisionProperty
 
     public override CollisionProperty Clone()
     {
-        return new BouncyProperty();       
+        return new BaseBouncyProperty();       
     }
     public override void Collision(ref Collision2D coll)
     {
         // If a missile hits this object
-        if (coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
+        if (coll.transform.CompareTag("Item") || coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
             return;
         if (bounces <= bounceCount)  // 5번 다 튕길 경우 삭제
         {
@@ -60,23 +148,11 @@ class BouncyProperty : CollisionProperty
         }
         bounceCount++;
         ContactPoint2D[] contact = coll.contacts;
-
-        bullet.SetDirection(Vector3.Reflect(bullet.Getdirection(), contact[0].normal)); // 진행방향을 반사각으로 바꿈.
-        bulletObj.transform.rotation = BulletCal.GetRotFromVector(bullet.Getdirection()); // 반사각에 따른 진행방향 이미지 회전
-    }
-}
-
-class PierceProperty : CollisionProperty
-{
-    public override CollisionProperty Clone()
-    {
-        return new PierceProperty();
-    }
-    public override void Collision(ref Collision2D coll)
-    {
-        // If a missile hits this object
-        if (coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
-            return;
+        if (contact.Length > 0)
+        {
+            bullet.SetDirection(Vector3.Reflect(bullet.Getdirection(), contact[0].normal)); // 진행방향을 반사각으로 바꿈.
+            bulletObj.transform.rotation = BulletCal.GetRotFromVector(bullet.Getdirection()); // 반사각에 따른 진행방향 이미지 회전
+        }
     }
 }
 

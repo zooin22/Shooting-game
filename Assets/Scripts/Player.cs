@@ -4,21 +4,14 @@ using UnityEngine;
 
 public class Player : Charcter
 {
+    public Transform arm;
+    public SpriteRenderer gunBody;
+    public Transform gunBarrel;
+    Vector3 aim;
+
     WeaponBag weaponBag;
     Weapon weapon;
 
-    private void Start()
-    {
-        speed = 2f;
-        state = State.IDLE;
-        weaponBag = new WeaponBag(this);
-        weaponBag.Add(new BaseGun  (5, 50, 10, 3, 10, 0.1f, 10));
-        weaponBag.Add(new BounceGun(5, 50, 10, 1, 10, 1, 10, 2));
-        weaponBag.Add(new ShotGun(5, 50, 10, 1, 10, 2, 10));
-        weaponBag.Add(new ChargeGun(5, 50, 1000, 1, 10, 2, 10));
-        //weaponBag.Add(new LaserGun(5, 50, 1000, 1, 50, 0, 10));
-        weapon = weaponBag.Init();
-    }
     private void Roll(Vector3 direction)
     {
         StartCoroutine(RollRoutine(direction));
@@ -28,7 +21,7 @@ public class Player : Charcter
         state = State.ROLL; // 구르기 상태 
         for (int i = 0; i < 10 ;i++) // 10프레임동안 움직이던 방향으로 구르기
         {
-            transform.position = transform.position + 2 * direction;
+            transform.position = transform.position + direction*0.1f;
             yield return new WaitForEndOfFrame();
         }
         state = State.IDLE; // Idle 상태 회복
@@ -45,14 +38,29 @@ public class Player : Charcter
             weaponBag.WheelWeapon(false);
         }
     }
+   
+    private void Raycast()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, 0.1f);
+    }
     public Weapon GetWeapon() { return weapon; }
-    public void SetWeapon(Weapon weapon) { this.weapon = weapon; }
+    public void SetWeapon(Weapon weapon) { this.weapon = weapon; gunBody.sprite = weapon.GetSprite(); }
     #region override
+    protected override void Aiming()
+    {
+        aim = Camera.main.ScreenToWorldPoint(new Vector2(Input.mousePosition.x, Input.mousePosition.y));
+        arm.rotation = BulletCal.GetRotFromVector(aim - this.transform.position);
+        arm.Rotate(new Vector3(0, 0, -90));
+    } 
+    protected override void Attacked(int damage)
+    {
+        this.hp -= damage;
+    }
     protected override void Move()
     {
         if (State.ROLL == state) // 구르고 있을 시 못 움직임.
             return;
-        oldPos = transform.position;
+        lastPosition = transform.position;
         if (Input.GetKey(KeyCode.W))
             transform.Translate(Vector3.up * speed * Time.deltaTime);
         if (Input.GetKey(KeyCode.A))
@@ -63,10 +71,11 @@ public class Player : Charcter
             transform.Translate(Vector3.down * speed * Time.deltaTime);
         if (Input.GetKeyDown(KeyCode.Space)) // 구르기
         {
-            Roll(transform.position - oldPos);
+            if (state == State.WALK)
+                Roll((transform.position - lastPosition).normalized);
             return;
         }
-        if (oldPos == transform.position) // 움직이지 않을 시 
+        if (lastPosition == transform.position) // 움직이지 않을 시 
         {
             state = State.IDLE;
         }
@@ -74,31 +83,59 @@ public class Player : Charcter
         {
             state = State.WALK;
         }
-    }
+    } 
     protected override void Action()
     {
         if (Input.GetKeyDown(KeyCode.R))
             weapon.Reload();
         Wheel();
-    }
-    protected override void Shot() // 미사일 발사
+    } 
+    protected override void Shot() 
     {
         if (State.ROLL == state || weapon.GetGunState() == GunState.RELOAD) // 구르고 있을 시, 재장전 시 발사 안됨.
             return;
-        if (Input.GetMouseButton(0)) // 왼쪽 클릭
+        if (Input.GetMouseButton(0)) // 왼쪽 다운
         {
-            weapon.MouseDown(this.transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x,Input.mousePosition.y,0))); // Weapon에 현재 위치, 목표 위치 전달
+            weapon.MouseDown(gunBarrel, Camera.main.ScreenToWorldPoint(new Vector2(Input.mousePosition.x, Input.mousePosition.y))); // Weapon에 현재 위치, 목표 위치 전달
         }
-        if (Input.GetMouseButtonUp(0)) // 왼쪽 클릭
+        if (Input.GetMouseButtonUp(0)) // 왼쪽 업
         {
-            weapon.MouseUp(this.transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0))); // Weapon에 현재 위치, 목표 위치 전달
+            weapon.MouseUp(gunBarrel, Camera.main.ScreenToWorldPoint(new Vector2(Input.mousePosition.x, Input.mousePosition.y))); // Weapon에 현재 위치, 목표 위치 전달
         }
     }
+    protected override void Death()
+    {
+        throw new System.NotImplementedException();
+    }
     #endregion
+
+    #region UnityFunction
+    private void Awake()
+    {
+        speed = 2f;
+        state = State.IDLE;
+        isAlive = true;
+        weaponBag = new WeaponBag(this);
+        weapon = weaponBag.Init();
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Item"))
+        {
+            Weapon item = collision.GetComponent<WeaponItemWrapper>().PickItem() as Weapon;
+            weaponBag.Add(item);
+            Destroy(collision.gameObject);
+        }
+    }
     private void Update()
+    {
+        Aiming();
+        Shot();
+    }
+    private void FixedUpdate()
     {
         Move();
         Action();
-        Shot();
     }
+    #endregion
 }

@@ -12,9 +12,9 @@ public class WeaponBag
     {
         this.player = player;
         weapons = new List<Weapon>();
-        weapons.Add(new NoWeapon(0, 0, 0, 0, 0, 0, 0));
+        weapons.Add(new NoWeapon());
         currentIndex = 0;
-        switchTime = 1;
+        switchTime = 0.2f;
     }
 
     public Weapon Init()
@@ -46,7 +46,6 @@ public class WeaponBag
         player.GetWeapon().SetGunState(GunState.SWITCH);
         player.GetWeapon().MouseUp(player.gameObject.transform, Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0))); // Weapon에 현재 위치, 목표 위치 전달
         CoroutineManager.instance.SwitchWeapon(switchTime,this);
-        Debug.Log(currentIndex);
     }
 
     public void SwapWeapon()

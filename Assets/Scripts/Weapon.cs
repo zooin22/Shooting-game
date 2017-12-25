@@ -1,25 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Xml.Serialization;
 
 public enum ShotType { CHARGED, SEMIAUTOMATIC, AUTOMATIC, BURST }
 public enum GunState { IDLE, SHOT, RELOAD, CHARGE, SWITCH }
 
-public abstract class Weapon : BaseObject // 무기 클래스
+[System.Serializable]
+public class Weapon : Item// 무기 클래스
 {
-    protected ShotMode shotMode;
-    protected BulletProperty bulletProperties;
-    //protected BulletStrategy bulletStrategy;
-    protected Bullet bullet;
-    protected GunState gunState;
-    protected ShotType shotType;
-    protected readonly int damage;//데미지
-    protected int ammoCapacity; //탄약 량
-    protected readonly int magazine; // 탄창 크기
-    protected int ammo; // 현재 탄약
-    protected readonly float reloadTime; // 리로드 속도
-    protected readonly float range; // 사거리 
-    protected readonly float rateOfFire; // 연사속도 
-    protected readonly float bulletSpeed; // 총알속도 
+    public string name;
+    public Sprite sprite;
+    public Sprite bulletSprite;
+    public ShotMode shotMode;
+    public BulletProperty bulletProperties;
+    public MouseMode mouseEvent;
+    public Bullet bullet;
+    public GunState gunState;
+    public ShotType shotType;
+    public int ammoCapacity; //탄약 량
+    public int magazine; // 탄창 크기
+    public int ammo; // 현재 탄약
+    public float reloadTime; // 리로드 속도
+    public float rateOfFire; // 연사속도 
+    private int num = 4; // 발사 갯수
+    private float angle = 60f; // 발사 각도
+    int maxCharged = 3;
+
     #region setter
     public void SetAmmo()
     {
@@ -35,13 +41,13 @@ public abstract class Weapon : BaseObject // 무기 클래스
     }
     #endregion
     #region getter
+    public Sprite GetSprite()
+    {
+        return sprite;
+    }
     public int GetAmmo()
     {
         return ammo;
-    }   
-    public int GetDamage()
-    {
-        return damage;
     }
     public int GetAmmoCapacity()
     {
@@ -63,29 +69,74 @@ public abstract class Weapon : BaseObject // 무기 클래스
     {
         return reloadTime;
     }
+    public ShotMode GetShotMode()
+    {
+        return shotMode;
+    }
     #endregion
 
-    public Weapon(int damage,int ammoCapacity,int magazine,float reloadTime,float range,float rateOfFire,float bulletSpeed) // 생성자
+    public Weapon()
     {
+
+    }
+    public Weapon(string name,Sprite sprite, Sprite bulletSprite, WeaponState.Owner owner,
+        int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, float minuteOfAngle,
+        int num, float angle, int maxCharged,
+        WeaponState.EBullet eBullet, WeaponState.EMouseMode eMouseMode, WeaponState.EShotMode eShotMode, WeaponState.EBulletProperty eUpdateProperty, WeaponState.EBulletProperty eCollisionProperty,
+        params WeaponState.EBulletProperty[] eBulletProperty) // 생성자
+    {
+        this.name = name;
+        this.sprite = sprite;
+        this.bulletSprite = bulletSprite;
         this.gunState = GunState.IDLE;
-        this.damage = damage;
         this.ammoCapacity = ammoCapacity;
         this.magazine = magazine;
         this.ammo = magazine;
         this.reloadTime = reloadTime;
-        this.range = range;
         this.rateOfFire = rateOfFire;
-        this.bulletSpeed = bulletSpeed;
+        this.num = num;
+        this.angle = angle;
+        this.maxCharged = maxCharged;
+        this.bullet = WeaponState.GetBullet(eBullet);
+        this.bullet.Init(owner, damage, bulletSpeed, range, bulletSprite);
+        this.bullet.Property((UpdateProperty)WeaponState.GetBulletProperty(eUpdateProperty));
+        this.bullet.Property((CollisionProperty)WeaponState.GetBulletProperty(eCollisionProperty));
+        this.bullet.BaseProperty(WeaponState.GetBulletProperty(eBulletProperty));
+        this.mouseEvent = WeaponState.GetMouseMode(eMouseMode);
+        mouseEvent.Init(this);
+        this.shotMode = WeaponState.GetShotMode(eShotMode);
+        this.shotMode.InitBullet(ref bullet, bulletSpeed, minuteOfAngle);
+        SubInit(eShotMode, shotMode);
     }
-
-    public virtual void MouseDown(Transform position, Vector3 dest) {
-        if (0 >= ammo || gunState != GunState.IDLE)
-            return;
+    public void SubInit(WeaponState.EShotMode eShotMode,ShotMode shotMode)
+    {
+        switch (eShotMode)
+        {
+            default:
+            case WeaponState.EShotMode.SingleShot:
+                break;
+            case WeaponState.EShotMode.SpreadShot:
+                SpreadShot spreadShot = (SpreadShot)shotMode;
+                spreadShot.Init(num, angle);
+                break;
+            case WeaponState.EShotMode.ChargeShot:
+                ChargeShot chargeShot = (ChargeShot)shotMode;
+                chargeShot.Init(maxCharged);
+                break;
+        }
+    }
+    public void MinusAmmo()
+    {
         ammo--;
-        RateOfFire();
-        shotMode.ShotStart(position, dest); // StrategyShot에 따른 발사.
     }
-    public virtual void MouseUp(Transform position, Vector3 dest) { }
+    public virtual void MouseDown(Transform position, Vector2 dest)
+    {
+        mouseEvent.MouseDown(position, dest);
+    }
+    public virtual void MouseUp(Transform position, Vector2 dest)
+    {
+        mouseEvent.MouseUp(position, dest);
+    }
     #region coroutine
     public virtual void RateOfFire()
     {
@@ -111,63 +162,84 @@ public abstract class Weapon : BaseObject // 무기 클래스
 
 class NoWeapon : Weapon
 {
-    public NoWeapon(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
-        base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
-    {
-    }
-
     #region override
-    public override void MouseDown(Transform position, Vector3 dest)
+    public override void MouseDown(Transform position, Vector2 dest)
     {
     }
-    public override void MouseUp(Transform position, Vector3 dest)
+    public override void MouseUp(Transform position, Vector2 dest)
     {
     }
     #endregion
 }
 
-class BaseGun : Weapon
-{
-    public BaseGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire,float bulletSpeed) : 
-        base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
-    {
-        bullet = new BaseBullet(damage, bulletSpeed, range);
-        bullet.CollisionProperty(new NormalProperty());
-        bullet.BaseCollisionProperty(new FreezeProperty(), new BurnProperty());
-        shotMode = new SingleShot(bullet);
-    }
+//class BaseGun : Weapon
+//{
+//    public BaseGun(WeaponState.Owner owner, int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire,float bulletSpeed) : 
+//        base(owner, damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
+//    {
+//        bullet = new BaseBullet(owner, damage, bulletSpeed, range);
+//        bullet.Property(new BaseBouncyProperty());
+//        bullet.BaseProperty(new HomingProperty(bulletSpeed));
+//        //bullet.BaseProperty(new FreezeProperty(), new BurnProperty());
+//        shotMode = new SingleShot(bullet,0.1f);
+//    }
 
-    #region override
-    #endregion
-}
+//    #region override
+//    #endregion
+//}
 
-class BounceGun : Weapon
-{
-    public BounceGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, int bounceTime) :
-        base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
-    {
-        bullet = new BaseBullet(damage, bulletSpeed, range);
-        bullet.CollisionProperty(new BouncyProperty());
-        shotMode = new SingleShot(bullet);
-    }
+//class BounceGun : Weapon
+//{
+//    public BounceGun(WeaponState.Owner owner, int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, int bounceTime) :
+//        base(owner, damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
+//    {
+//        bullet = new BaseBullet(owner, damage, bulletSpeed, range);
+//        bullet.Property(new BaseBouncyProperty());
+//        shotMode = new SingleShot(bullet,0);
+//    }
 
-    #region override
-    #endregion
-}
+//    #region override
+//    #endregion
+//}
 
-class ShotGun : Weapon
-{
-    public ShotGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
-        base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
-    {
-        bullet = new BaseBullet(damage, bulletSpeed, range);
-        bullet.CollisionProperty(new BouncyProperty());
-        shotMode = new SpreadShot(bullet, 5, 60);
-    }
+//class ShotGun : Weapon
+//{
+//    public ShotGun(WeaponState.Owner owner, int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
+//        base(owner, damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
+//    {
+//        bullet = new BaseBullet(owner, damage, bulletSpeed, range);
+//        bullet.Property(new BaseBouncyProperty());
+//        shotMode = new SpreadShot(bullet, 0, 5, 60);
+//    }
 
-    #region override
-    #endregion
-}
+//    #region override
+//    #endregion
+//}
+
+//class ChargeGun : Weapon
+//{
+//    public ChargeGun(WeaponState.Owner owner, int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
+//        base(owner, damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
+//    {
+//        bullet = new BaseBullet(owner, damage, bulletSpeed, range);
+//        bullet.Property(new BaseBouncyProperty());
+//        shotMode = new ChargeShot(bullet, 2);
+//    }
+
+//    #region override
+//    public override void MouseDown(Transform position, Vector2 dest)
+//    {
+//        if (0 >= ammo || gunState == GunState.SHOT || gunState == GunState.RELOAD || gunState == GunState.SWITCH)
+//            return;
+//        ammo--;
+//        shotMode.ShotStart(position, dest); // shotMode에 따른 발사.
+//    }
+//    public override void MouseUp(Transform position, Vector2 dest)
+//    {
+//        shotMode.ShotEnd(position, dest); // StrategyShot에 따른 발사.
+//    }
+//    #endregion
+//}
 
 //class LaserGun : Weapon
 //{
@@ -191,28 +263,3 @@ class ShotGun : Weapon
 //    }
 //    #endregion
 //}
-
-class ChargeGun : Weapon
-{
-    public ChargeGun(int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed) :
-        base(damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed)
-    {
-        bullet = new BaseBullet(damage, bulletSpeed, range);
-        bullet.CollisionProperty(new BouncyProperty());
-        shotMode = new ChargeShot(bullet,2);
-    }
-
-    #region override
-    public override void MouseDown(Transform position, Vector3 dest)
-    {
-        if (0 >= ammo || gunState == GunState.SHOT || gunState == GunState.RELOAD || gunState == GunState.SWITCH)
-            return;
-        ammo--;
-        shotMode.ShotStart(position, dest); // shotMode에 따른 발사.
-    }
-    public override void MouseUp(Transform position, Vector3 dest)
-    {
-        shotMode.ShotEnd(position, dest); // StrategyShot에 따른 발사.
-    }
-    #endregion
-}

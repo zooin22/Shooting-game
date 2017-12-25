@@ -21,9 +21,36 @@ public class ObjectPool : MonoBehaviour { // 오브젝트 풀링을 위한 클�
         }
 	}
 
-    public List<GameObject> GetList()
+    public Vector3 GetNeareastObject(Vector3 from)
     {
-        return pooledObjects;
+        bool flag = false;
+        float distance = 0;
+        int index = -1;
+        for (int i = 0; i < pooledObjects.Count; i++)
+        {
+            if (pooledObjects[i].activeInHierarchy)
+            {
+                if (!flag)
+                {
+                    distance = Vector2.SqrMagnitude(from - pooledObjects[i].transform.position);
+                    flag = true;
+                    index = i;
+                }
+                else
+                {
+                    if (distance >= Vector2.SqrMagnitude(from - pooledObjects[i].transform.position))
+                    {
+                        distance = Vector2.SqrMagnitude(from - pooledObjects[i].transform.position);
+                        index = i;
+                    };
+                }
+            }
+        }
+        if (index < 0)
+        {
+            return Vector3.zero;
+        }
+        return pooledObjects[index].transform.position - from;
     }
 
     public GameObject GetPooledObject() // Pool에서 오브젝트 가져오기
