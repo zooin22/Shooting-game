@@ -82,6 +82,11 @@ public class WeaponItemWrapper : ItemWrapper
         this.eBulletProperty = eBulletProperty;
         this.eMouseMode = eMouseMode;
         this.eShotMode = eShotMode;
+        CallItem(name, sprite, bulletSprite, owner,
+             damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle,
+             num, angle, maxCharged,
+             eBullet, eMouseMode, eShotMode, eUpdateProperty, eCollisionProperty,
+             eBulletProperty);
     }
 
     public void CallItem(string name, Sprite sprite, Sprite bulletSprite, WeaponState.Owner owner,

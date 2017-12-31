@@ -4,14 +4,6 @@ using UnityEngine;
 
 public class Player : Charcter
 {
-    public Transform arm;
-    public SpriteRenderer gunBody;
-    public Transform gunBarrel;
-    Vector3 aim;
-
-    WeaponBag weaponBag;
-    Weapon weapon;
-
     private void Roll(Vector3 direction)
     {
         StartCoroutine(RollRoutine(direction));
@@ -39,23 +31,23 @@ public class Player : Charcter
         }
     }
    
-    private void Raycast()
-    {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, 0.1f);
-    }
-    public Weapon GetWeapon() { return weapon; }
-    public void SetWeapon(Weapon weapon) { this.weapon = weapon; gunBody.sprite = weapon.GetSprite(); }
+    //private void Raycast()
+    //{
+    //    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, 0.1f);
+    //}
     #region override
+    public override void Attacked(int damage)
+    {
+        this.hp -= damage;
+        if (hp < 0)
+            Death();
+    }
     protected override void Aiming()
     {
         aim = Camera.main.ScreenToWorldPoint(new Vector2(Input.mousePosition.x, Input.mousePosition.y));
         arm.rotation = BulletCal.GetRotFromVector(aim - this.transform.position);
         arm.Rotate(new Vector3(0, 0, -90));
     } 
-    protected override void Attacked(int damage)
-    {
-        this.hp -= damage;
-    }
     protected override void Move()
     {
         if (State.ROLL == state) // 구르고 있을 시 못 움직임.
@@ -108,7 +100,6 @@ public class Player : Charcter
         throw new System.NotImplementedException();
     }
     #endregion
-
     #region UnityFunction
     private void Awake()
     {

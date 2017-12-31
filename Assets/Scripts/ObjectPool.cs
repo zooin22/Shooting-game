@@ -73,13 +73,26 @@ public class ObjectPool : MonoBehaviour { // 오브젝트 풀링을 위한 클�
         return null;
     }
 
-    public void FreeObject(GameObject gameObject) // 오브젝트 삭제
+    public void FreeObject(GameObject gameObject,Pool pool) // 오브젝트 삭제
     {
         gameObject.SetActive(false);
-        DestroyComponent(gameObject);
+        switch (pool)
+        {
+            case Pool.BULLET:
+                DestroyBullet(gameObject);
+                break;
+            case Pool.ENEMY:
+                DestroyEnemy(gameObject);
+                break;
+        }
     }
 
-    public void DestroyComponent(GameObject gameObject)
+    private void DestroyEnemy(GameObject gameObject)
+    {
+        if (gameObject.GetComponent<BulletWrapper>() != null)
+            gameObject.GetComponent<BulletWrapper>().Destroy();
+    }
+    private void DestroyBullet(GameObject gameObject)
     {
         if (gameObject.GetComponent<BulletWrapper>() != null)
             gameObject.GetComponent<BulletWrapper>().Destroy();

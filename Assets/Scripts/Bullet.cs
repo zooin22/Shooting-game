@@ -44,14 +44,14 @@ public abstract class Bullet
     }
     protected bool CheckDistance()
     {
-        if (distance > range)
+        if (distance >= range)
             return false;
         return true;
     }
     public WeaponState.Owner GetOwner() { return owner; }
     public void Remove() // 게임 풀 오브젝트 false
     {
-        PoolGroup.instance.GetObjectPool(Pool.BULLET).FreeObject(this.gameObject);
+        PoolGroup.instance.GetObjectPool(Pool.BULLET).FreeObject(this.gameObject,Pool.BULLET);
     }
     public void Update()
     {
@@ -72,6 +72,7 @@ public abstract class Bullet
     {
         return gameObject;
     }
+    public int GetDamage() { return damage; }
     public float GetSpeed()
     {
         return speed;

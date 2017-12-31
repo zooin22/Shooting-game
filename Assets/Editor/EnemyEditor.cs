@@ -17,7 +17,8 @@ public class EnemyEditor : EditorWindow
     int hp = 1;
     float speed;
     int size = 1;
-    
+    EnemyState.EEnemyMoveMode eEnemyMoveMode;
+
     [MenuItem("Custom/Enemy")]
     static public void ShowWindow()
     {
@@ -30,12 +31,15 @@ public class EnemyEditor : EditorWindow
     void OnGUI()
     {
 #pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
-        obj = (GameObject)EditorGUILayout.ObjectField("Find Dependency", obj, typeof(GameObject));
+        obj = (GameObject)EditorGUILayout.ObjectField("Weapon", obj, typeof(GameObject));
 #pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
         name = EditorGUILayout.TextField("Name", name);
         position = EditorGUILayout.Vector2Field("Position", position);
         sprite = (Sprite)EditorGUILayout.ObjectField("EnemySprite", sprite, typeof(Sprite), allowSceneObjects: true);
+        hp = EditorGUILayout.IntField("Hp", hp);
         size = EditorGUILayout.IntField("Size", size);
+        speed = EditorGUILayout.FloatField("Speed", speed);
+        eEnemyMoveMode = (EnemyState.EEnemyMoveMode)EditorGUILayout.EnumPopup("EnemyMoveMode", eEnemyMoveMode);
         EditorGUI.BeginChangeCheck();
         numOfBulletType = EditorGUILayout.IntField("NumOfBulletType", numOfBulletType);
         if (EditorGUI.EndChangeCheck())
@@ -48,17 +52,21 @@ public class EnemyEditor : EditorWindow
         }
 
 
-        if (GUILayout.Button("Create"))
+        if (GUILayout.Button("Create Object"))
         {
+            if (obj == null)
+                return;
             GameObject enemyObj = Instantiate(Resources.Load("Prefabs/Enemy") as GameObject, position, Quaternion.identity, null);
             enemyObj.name = name;
             enemyObj.transform.localScale = new Vector2(size, size);
             Enemy enemy = enemyObj.GetComponent<Enemy>();
-            enemy.Init(sprite, GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>(), hp, speed);
+            enemy.Init(sprite, obj.GetComponent<WeaponItemWrapper>().PickItem() as Weapon, GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>(), hp, speed, eEnemyMoveMode);
         }
-        if (GUILayout.Button("Save"))
+        if (GUILayout.Button("Call Pool"))
         {
-            EnemyManager.instance.SpawnEnemy(sprite, position, size, hp, speed);
+            if (obj == null)
+                return;
+            EnemyManager.instance.SpawnEnemy(sprite, obj.GetComponent<WeaponItemWrapper>().PickItem() as Weapon, position, size, hp, speed, eEnemyMoveMode);
         }
     }
 

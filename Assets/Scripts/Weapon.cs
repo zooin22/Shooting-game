@@ -24,7 +24,8 @@ public class Weapon : Item// 무기 클래스
     public float rateOfFire; // 연사속도 
     private int num = 4; // 발사 갯수
     private float angle = 60f; // 발사 각도
-    int maxCharged = 3;
+    private int maxCharged = 3;
+    private float range;
 
     #region setter
     public void SetAmmo()
@@ -73,6 +74,7 @@ public class Weapon : Item// 무기 클래스
     {
         return shotMode;
     }
+    public float GetRange() { return range; }
     #endregion
 
     public Weapon()
@@ -97,6 +99,7 @@ public class Weapon : Item// 무기 클래스
         this.num = num;
         this.angle = angle;
         this.maxCharged = maxCharged;
+        this.range = range; 
         this.bullet = WeaponState.GetBullet(eBullet);
         this.bullet.Init(owner, damage, bulletSpeed, range, bulletSprite);
         this.bullet.Property((UpdateProperty)WeaponState.GetBulletProperty(eUpdateProperty));

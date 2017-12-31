@@ -18,7 +18,13 @@ class NormalMode : MouseMode
     public override void MouseDown(Transform position, Vector2 dest)
     {
         if (0 >= weapon.GetAmmo() || weapon.GetGunState() != GunState.IDLE)
+        {
+            if(weapon.GetAmmo() == 0)
+            {
+                weapon.Reload();
+            }
             return;
+        }
         weapon.MinusAmmo();
         weapon.RateOfFire();
         weapon.GetShotMode().ShotStart(position, dest); // StrategyShot에 따른 발사.

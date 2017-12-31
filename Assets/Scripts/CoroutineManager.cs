@@ -39,9 +39,9 @@ public class CoroutineManager : MonoBehaviour {
     public void SwitchWeapon(float reloadTime, WeaponBag weaponBag)
     {
         weaponBag.Init();
-        StartCoroutine(SwitchWeaponRouine(reloadTime, weaponBag));
+        StartCoroutine(SwitchWeaponRoutine(reloadTime, weaponBag));
     }
-    private IEnumerator SwitchWeaponRouine(float reloadTime, WeaponBag weaponBag) // 리로드 코루틴을 위한 코루틴 함수
+    private IEnumerator SwitchWeaponRoutine(float reloadTime, WeaponBag weaponBag) // 리로드 코루틴을 위한 코루틴 함수
     {
         yield return new WaitForSeconds(reloadTime);
         weaponBag.SwapWeapon();

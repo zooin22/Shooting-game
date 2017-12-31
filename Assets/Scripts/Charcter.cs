@@ -12,9 +12,19 @@ public abstract class Charcter : BaseObject
     protected bool isAlive;
     protected State state;
     protected Vector3 lastPosition;
+    protected WeaponBag weaponBag;
+    protected Weapon weapon;
+    protected Vector3 aim;
 
+    public Transform arm;
+    public SpriteRenderer gunBody;
+    public Transform gunBarrel;
+
+    public Weapon GetWeapon() { return weapon; }
+    public void SetWeapon(Weapon weapon) { this.weapon = weapon; gunBody.sprite = weapon.GetSprite(); }
+
+    public abstract void Attacked(int damage); //피격
     protected abstract void Aiming(); //조준
-    protected abstract void Attacked(int damage); //피격
     protected abstract void Move(); //이동
     protected abstract void Action(); //행동
     protected abstract void Shot(); //발사
