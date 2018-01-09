@@ -23,7 +23,7 @@ class BaseNormalUpdateProperty : UpdateProperty
 
     public override void Init()
     {
-        base.Init(bulletObj,bullet);
+        base.Init(bulletObj, bullet);
         this.speed = bullet.GetSpeed();
     }
     public override UpdateProperty Clone()
@@ -100,6 +100,10 @@ class HomingProperty : UpdateProperty
 
 public abstract class CollisionProperty : BulletProperty
 {
+    public void Ignore(ref Collision2D coll)
+    {
+        Physics2D.IgnoreCollision(coll.gameObject.GetComponent<Collider2D>(), bulletObj.GetComponent<Collider2D>());
+    }
     public abstract CollisionProperty Clone();
     public abstract void Collision(ref Collision2D coll);
 }
@@ -113,22 +117,27 @@ class BaseNormalCollisionProperty : CollisionProperty
     public override void Collision(ref Collision2D coll)
     {
         // If a missile hits this object
-        if (coll.transform.CompareTag("Item") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
+        if (coll.transform.CompareTag("Bullet")) // bullet에는 충돌하지 않음
             return;
+        Ignore(ref coll);
         switch (owner)
         {
             default:
             case WeaponState.Owner.PLAYER:
-                if (coll.transform.CompareTag("Player")) // 플레이어에는 충돌하지 않음
+                if (coll.transform.CompareTag("Player")) // 플레이어에게는 충돌하지 않음
                     return;
                 if (coll.transform.GetComponent<Enemy>())
                 {
-                    coll.transform.GetComponent<Enemy>().Attacked(bullet.GetDamage());
+                    coll.transform.GetComponent<Enemy>().Attacked(bullet.GetDamage(), bullet.Getdirection(), bullet.GetKnockBack());
                 }
                 break;
             case WeaponState.Owner.ENEMY:
-                if (coll.transform.CompareTag("Enemy")) // 플레이어에는 충돌하지 않음
+                if (coll.transform.CompareTag("Enemy")) // 적에게는 충돌하지 않음
                     return;
+                if (coll.transform.GetComponent<Player>())
+                {
+                    coll.transform.GetComponent<Player>().Attacked(bullet.GetDamage(), bullet.Getdirection(), bullet.GetKnockBack());
+                }
                 break;
         }
         bullet.Remove();
@@ -144,13 +153,14 @@ class BasePierceProperty : CollisionProperty
     public override void Collision(ref Collision2D coll)
     {
         // If a missile hits this object
-        if (coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
+        if (coll.transform.CompareTag("Bullet")) // bullet에는 충돌하지 않음
             return;
         if (coll.transform.CompareTag("Wall"))
         {
             bullet.Remove();
             return;
         }
+        Ignore(ref coll);
         switch (owner)
         {
             default:
@@ -159,14 +169,18 @@ class BasePierceProperty : CollisionProperty
                     return;
                 if (coll.transform.GetComponent<Enemy>())
                 {
-                    coll.transform.GetComponent<Enemy>().Attacked(bullet.GetDamage());
+                    coll.transform.GetComponent<Enemy>().Attacked(bullet.GetDamage(), bullet.Getdirection(), bullet.GetKnockBack());
                 }
                 break;
             case WeaponState.Owner.ENEMY:
-                if (coll.transform.CompareTag("Enemy")) // 플레이어에는 충돌하지 않음
+                if (coll.transform.CompareTag("Enemy")) // 적에게는 충돌하지 않음
                     return;
+                if (coll.transform.GetComponent<Player>())
+                {
+                    coll.transform.GetComponent<Player>().Attacked(bullet.GetDamage(), bullet.Getdirection(), bullet.GetKnockBack());
+                }
                 break;
-        }        
+        }
     }
 }
 
@@ -182,12 +196,12 @@ class BaseBouncyProperty : CollisionProperty
 
     public override CollisionProperty Clone()
     {
-        return new BaseBouncyProperty();       
+        return new BaseBouncyProperty();
     }
     public override void Collision(ref Collision2D coll)
     {
         // If a missile hits this object
-        if (coll.transform.CompareTag("Item") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
+        if (coll.transform.CompareTag("Bullet")) // bullet에는 충돌하지 않음
             return;
         switch (owner)
         {
@@ -197,12 +211,16 @@ class BaseBouncyProperty : CollisionProperty
                     return;
                 if (coll.transform.GetComponent<Enemy>())
                 {
-                    coll.transform.GetComponent<Enemy>().Attacked(bullet.GetDamage());
+                    coll.transform.GetComponent<Enemy>().Attacked(bullet.GetDamage(), bullet.Getdirection(), bullet.GetKnockBack());
                 }
                 break;
             case WeaponState.Owner.ENEMY:
-                if (coll.transform.CompareTag("Enemy")) // 플레이어에는 충돌하지 않음
+                if (coll.transform.CompareTag("Enemy")) // 적에게는 충돌하지 않음
                     return;
+                if (coll.transform.GetComponent<Player>())
+                {
+                    coll.transform.GetComponent<Player>().Attacked(bullet.GetDamage(), bullet.Getdirection(), bullet.GetKnockBack());
+                }
                 break;
         }
         if (bounces <= bounceCount)  // 5번 다 튕길 경우 삭제
@@ -239,7 +257,7 @@ class FreezeProperty : CollisionProperty
                     return;
                 break;
             case WeaponState.Owner.ENEMY:
-                if (coll.transform.CompareTag("Enemy")) // 플레이어에는 충돌하지 않음
+                if (coll.transform.CompareTag("Enemy")) // 적에게는 충돌하지 않음
                     return;
                 break;
         }
@@ -266,7 +284,7 @@ class BurnProperty : CollisionProperty
                     return;
                 break;
             case WeaponState.Owner.ENEMY:
-                if (coll.transform.CompareTag("Enemy")) // 플레이어에는 충돌하지 않음
+                if (coll.transform.CompareTag("Enemy")) // 적에게는 충돌하지 않음
                     return;
                 break;
         }

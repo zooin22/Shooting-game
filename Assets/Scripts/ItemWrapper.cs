@@ -36,9 +36,12 @@ public class WeaponItemWrapper : ItemWrapper
     public float rateOfFire;
     public float bulletSpeed;
     public float minuteOfAngle;
+    public float knockBack;
+
     public int num;
     public float angle;
     public int maxCharged;
+
     public WeaponState.EBullet eBullet;
     public WeaponState.EBulletProperty eUpdateProperty;
     public WeaponState.EBulletProperty eCollisionProperty;
@@ -49,14 +52,14 @@ public class WeaponItemWrapper : ItemWrapper
     public void Start()
     {
         CallItem(name, sprite, bulletSprite, owner,
-              damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle,
+              damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle, knockBack,
               num, angle, maxCharged,
               eBullet, eMouseMode, eShotMode, eUpdateProperty, eCollisionProperty,
               eBulletProperty);
     }
 
     public void SetItem(string name, Sprite sprite, Sprite bulletSprite, WeaponState.Owner owner,
-       int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, float minuteOfAngle,
+       int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, float minuteOfAngle, float knockBack,
        int num, float angle, int maxCharged,
        WeaponState.EBullet eBullet, WeaponState.EMouseMode eMouseMode, WeaponState.EShotMode eShotMode, WeaponState.EBulletProperty eUpdateProperty, WeaponState.EBulletProperty eCollisionProperty,
        params WeaponState.EBulletProperty[] eBulletProperty)
@@ -73,6 +76,7 @@ public class WeaponItemWrapper : ItemWrapper
         this.rateOfFire = rateOfFire;
         this.bulletSpeed = bulletSpeed;
         this.minuteOfAngle = minuteOfAngle;
+        this.knockBack = knockBack;
         this.num = num;
         this.angle = angle;
         this.maxCharged = maxCharged;
@@ -83,14 +87,14 @@ public class WeaponItemWrapper : ItemWrapper
         this.eMouseMode = eMouseMode;
         this.eShotMode = eShotMode;
         CallItem(name, sprite, bulletSprite, owner,
-             damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle,
+             damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle, knockBack,
              num, angle, maxCharged,
              eBullet, eMouseMode, eShotMode, eUpdateProperty, eCollisionProperty,
              eBulletProperty);
     }
 
     public void CallItem(string name, Sprite sprite, Sprite bulletSprite, WeaponState.Owner owner,
-        int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, float minuteOfAngle,
+        int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, float minuteOfAngle, float knockBack,
         int num, float angle, int maxCharged,
         WeaponState.EBullet eBullet, WeaponState.EMouseMode eMouseMode, WeaponState.EShotMode eShotMode, WeaponState.EBulletProperty eUpdateProperty, WeaponState.EBulletProperty eCollisionProperty,
         params WeaponState.EBulletProperty[] eBulletProperty)
@@ -99,7 +103,7 @@ public class WeaponItemWrapper : ItemWrapper
         SpriteRenderer renderer = GetComponent<SpriteRenderer>();
         renderer.sprite = sprite;
 
-        item = new Weapon(name, sprite, bulletSprite, owner, damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle,
+        item = new Weapon(name, sprite, bulletSprite, owner, damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle, knockBack,
             num, angle, maxCharged,
             eBullet, eMouseMode, eShotMode, eUpdateProperty, eCollisionProperty,
            eBulletProperty);

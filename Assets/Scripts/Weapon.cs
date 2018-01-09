@@ -82,7 +82,7 @@ public class Weapon : Item// 무기 클래스
 
     }
     public Weapon(string name,Sprite sprite, Sprite bulletSprite, WeaponState.Owner owner,
-        int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, float minuteOfAngle,
+        int damage, int ammoCapacity, int magazine, float reloadTime, float range, float rateOfFire, float bulletSpeed, float minuteOfAngle, float knockBack,
         int num, float angle, int maxCharged,
         WeaponState.EBullet eBullet, WeaponState.EMouseMode eMouseMode, WeaponState.EShotMode eShotMode, WeaponState.EBulletProperty eUpdateProperty, WeaponState.EBulletProperty eCollisionProperty,
         params WeaponState.EBulletProperty[] eBulletProperty) // 생성자
@@ -101,7 +101,7 @@ public class Weapon : Item// 무기 클래스
         this.maxCharged = maxCharged;
         this.range = range; 
         this.bullet = WeaponState.GetBullet(eBullet);
-        this.bullet.Init(owner, damage, bulletSpeed, range, bulletSprite);
+        this.bullet.Init(owner, damage, bulletSpeed, range, knockBack, bulletSprite);
         this.bullet.Property((UpdateProperty)WeaponState.GetBulletProperty(eUpdateProperty));
         this.bullet.Property((CollisionProperty)WeaponState.GetBulletProperty(eCollisionProperty));
         this.bullet.BaseProperty(WeaponState.GetBulletProperty(eBulletProperty));

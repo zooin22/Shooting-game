@@ -9,8 +9,8 @@ public class EnemyEditor : EditorWindow
 {
 
     GameObject obj;
-    string name;
-    Vector2 position;
+    new string name;
+    new Vector2 position;
     Sprite sprite; // 적 모습
     Sprite[] bulletSprite; // 적 총알 모습
     int numOfBulletType = 0;

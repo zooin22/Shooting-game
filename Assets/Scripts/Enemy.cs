@@ -34,10 +34,23 @@ public class Enemy : Charcter
         Debug.DrawLine(gunBarrel.position, hit.point, Color.cyan);
         return hit.collider;
     }
+    private IEnumerator KnockBack(Vector2 pushDirection, float knockPower, float knockDur)
+    {
+        this.state = State.KNOCKBACK;
+        float timer = 0;
+        while (knockDur > timer)
+        {
+            timer += Time.deltaTime;
+            this.GetComponent<Rigidbody2D>().MovePosition(Vector2.MoveTowards(transform.position, new Vector3(transform.position.x + pushDirection.x, transform.position.y + pushDirection.y, 0), knockPower * Time.deltaTime)); // the knock back
+            yield return new WaitForFixedUpdate();
+        }
+        this.state = State.IDLE;
+    }
     #region override
-    public override void Attacked(int damage)
+    public override void Attacked(int damage, Vector2 pushDirection, float knockPower)
     {
         this.hp -= damage;
+        StartCoroutine(KnockBack(pushDirection, knockPower, 0.1f));
         if (hp < 0)
             Death();
     }
@@ -61,7 +74,7 @@ public class Enemy : Charcter
     }
     protected override void Move()
     {
-        if (!isMoving)
+        if (!isMoving || State.ROLL == state || State.KNOCKBACK == state)
         {
             enemyMoveMode.Stop(this);
             return;
@@ -82,7 +95,7 @@ public class Enemy : Charcter
     {
         isAlive = false;
         Remove();
-        Debug.Log("Death");
+        Debug.Log("DeatH");
     }
     #endregion
     #region UnityFunction

@@ -15,7 +15,7 @@ class BulletWrapper : BaseObject // cBullet 클래스가 Decorator Pattern이라
     
     private void OnCollisionEnter2D(Collision2D coll) // 충돌 시
     {
-        if (null == this.bullet || coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet"))// 플레이어 or bullet에는 충돌하지 않음
+        if (null == this.bullet || coll.transform.CompareTag("Bullet"))// 플레이어 or bullet에는 충돌하지 않음
             return;
         this.bullet.OnCollisionEnter2D(coll);
     }

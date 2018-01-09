@@ -20,6 +20,7 @@ public class WeaponEditor : EditorWindow {
     float rateOfFire;
     float bulletSpeed;
     float minuteOfAngle;
+    float knockBack;
     int num = 1;
     float angle = 60;
     int maxCharged = 2;
@@ -55,6 +56,7 @@ public class WeaponEditor : EditorWindow {
         rateOfFire = EditorGUILayout.FloatField("RateOfFire", rateOfFire);
         bulletSpeed = EditorGUILayout.FloatField("BulletSpeed", bulletSpeed);
         minuteOfAngle = EditorGUILayout.FloatField("MinuteOfAngle", minuteOfAngle);
+        knockBack = EditorGUILayout.FloatField("KnockBack", knockBack);
         switch (eShotMode)
         {
             default:
@@ -88,7 +90,7 @@ public class WeaponEditor : EditorWindow {
             GameObject weaponObj = Instantiate(Resources.Load("Prefabs/Item") as GameObject,Vector3.zero,Quaternion.identity,null);
             weaponObj.name = name;
             weaponObj.AddComponent<WeaponItemWrapper>().SetItem(name, sprite, bulletSprite, owner,
-                damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle, 
+                damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle, knockBack,
                 num,angle,maxCharged,
                 eBullet, eMouseMode, eShotMode, eUpdateProperty, eCollisionProperty,
                 eBulletProperty);
@@ -119,7 +121,7 @@ public class WeaponEditor : EditorWindow {
                 GameObject weaponObj = Instantiate(Resources.Load("Prefabs/Item") as GameObject, Vector3.zero, Quaternion.identity, null);
                 weaponObj.name = name;
                 weaponObj.AddComponent<WeaponItemWrapper>().SetItem(name, sprite, bulletSprite, owner,
-                    damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle,
+                    damage, ammoCapacity, magazine, reloadTime, range, rateOfFire, bulletSpeed, minuteOfAngle, knockBack,
                     num, angle, maxCharged,
                     eBullet, eMouseMode, eShotMode, eUpdateProperty, eCollisionProperty,
                     eBulletProperty);

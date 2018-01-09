@@ -30,15 +30,23 @@ public class Player : Charcter
             weaponBag.WheelWeapon(false);
         }
     }
-   
-    //private void Raycast()
-    //{
-    //    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, 0.1f);
-    //}
+    private IEnumerator KnockBack(Vector2 pushDirection, float knockPower, float knockDur)
+    {
+        this.state = State.KNOCKBACK;
+        float timer = 0;
+        while (knockDur > timer)
+        {
+            timer += Time.deltaTime;
+            this.GetComponent<Rigidbody2D>().MovePosition(Vector2.MoveTowards(transform.position, new Vector3(transform.position.x + pushDirection.x, transform.position.y + pushDirection.y,0), knockPower * Time.deltaTime)); // the knock back
+            yield return new WaitForFixedUpdate();
+        }
+        this.state = State.IDLE;
+    }
     #region override
-    public override void Attacked(int damage)
+    public override void Attacked(int damage,Vector2 pushDirection,float knockPower)
     {
         this.hp -= damage;
+        StartCoroutine(KnockBack(pushDirection, knockPower, 0.1f));
         if (hp < 0)
             Death();
     }
@@ -50,7 +58,7 @@ public class Player : Charcter
     } 
     protected override void Move()
     {
-        if (State.ROLL == state) // 구르고 있을 시 못 움직임.
+        if (State.ROLL == state || State.KNOCKBACK == state) // 넉백, 구르고 있을 시 못 움직임.
             return;
         lastPosition = transform.position;
         if (Input.GetKey(KeyCode.W))
@@ -97,7 +105,7 @@ public class Player : Charcter
     }
     protected override void Death()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("DeatH");
     }
     #endregion
     #region UnityFunction

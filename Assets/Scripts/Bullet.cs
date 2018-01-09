@@ -25,6 +25,7 @@ public abstract class Bullet
     protected Vector3 direction; // 방향
     protected Vector3 shotPos; // 시작 벡터
     protected float distance = 0; // 움직인 거리 Time.deltaTime * speed
+    protected float knockBack = 0;
    
     public Bullet()
     {
@@ -34,12 +35,13 @@ public abstract class Bullet
         updatePropertis = new List<UpdateProperty>();
         collisionPropertis = new List<CollisionProperty>();
     }
-    public void Init(WeaponState.Owner owner, int damage, float speed, float range , Sprite bulletSprite)
+    public void Init(WeaponState.Owner owner, int damage, float speed, float range, float knockBack, Sprite bulletSprite)
     {
         this.owner = owner;
         this.damage = damage;
         this.speed = speed;
         this.range = range;
+        this.knockBack = knockBack;
         this.sprite = bulletSprite;
     }
     protected bool CheckDistance()
@@ -73,18 +75,10 @@ public abstract class Bullet
         return gameObject;
     }
     public int GetDamage() { return damage; }
-    public float GetSpeed()
-    {
-        return speed;
-    }
-    public float GetRange()
-    {
-        return range;
-    }
-    public virtual Vector3 Getdirection()
-    {
-        return direction;
-    }
+    public float GetKnockBack() { return knockBack; }
+    public float GetSpeed() { return speed; }
+    public float GetRange() { return range; }
+    public virtual Vector3 Getdirection() { return direction; }
     #endregion
     #region setter
     public void SetChargeDamage(int i) // 데미지 증가
@@ -193,7 +187,7 @@ class BaseBullet : Bullet // 노말 총알 - 데미지.
     public override Bullet Clone()
     {
         Bullet clone = new BaseBullet();
-        clone.Init(owner, damage, speed, range, sprite);
+        clone.Init(owner, damage, speed, range, knockBack, sprite);
         clone.Property(baseCollision);
         clone.Property(baseUpdate);
         clone.BaseProperty(collisionPropertis);
@@ -203,10 +197,8 @@ class BaseBullet : Bullet // 노말 총알 - 데미지.
 
     public override void OnCollisionEnter2D(Collision2D coll)
     {
-        if (coll.transform.CompareTag("Player") || coll.transform.CompareTag("Bullet")) // 플레이어 or bullet에는 충돌하지 않음
-            return;
         baseCollision.Collision(ref coll);
-        for(int i = 0; i < collisionLength; i++)
+        for (int i = 0; i < collisionLength; i++)
         {
             collisionPropertis[i].Collision(ref coll);
         }
