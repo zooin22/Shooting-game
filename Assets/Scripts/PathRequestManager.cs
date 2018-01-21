@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Threading;
 
-public class PathRequestManager : MonoBehaviour
+public class PathRequestManager : BaseObject
 {
 
     Queue<PathResult> results = new Queue<PathResult>();

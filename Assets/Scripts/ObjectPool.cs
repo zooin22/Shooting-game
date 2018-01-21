@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ObjectPool : MonoBehaviour { // 오브젝트 풀링을 위한 클래스
+public class ObjectPool : BaseObject
+{ // 오브젝트 풀링을 위한 클래스
 
     public GameObject pooledObject; // 오브젝트
     public int pooledAmount = 20; // 오브젝트 수

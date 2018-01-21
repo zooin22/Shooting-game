@@ -236,6 +236,8 @@
     <Compile Include="Assets\Scripts\ItemBag.cs" />
     <Compile Include="Assets\Scripts\ItemWrapper.cs" />
     <Compile Include="Assets\Scripts\JsonManager.cs" />
+    <Compile Include="Assets\Scripts\Map.cs" />
+    <Compile Include="Assets\Scripts\MeshGenerator.cs" />
     <Compile Include="Assets\Scripts\MouseEvent.cs" />
     <Compile Include="Assets\Scripts\Node.cs" />
     <Compile Include="Assets\Scripts\ObjectPool.cs" />
@@ -243,6 +245,7 @@
     <Compile Include="Assets\Scripts\PathRequestManager.cs" />
     <Compile Include="Assets\Scripts\Player.cs" />
     <Compile Include="Assets\Scripts\PoolGroup.cs" />
+    <Compile Include="Assets\Scripts\Room.cs" />
     <Compile Include="Assets\Scripts\ShotMode.cs" />
     <Compile Include="Assets\Scripts\Unit.cs" />
     <Compile Include="Assets\Scripts\Wall.cs" />
