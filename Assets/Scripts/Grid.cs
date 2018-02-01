@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Grid : BaseObject
+public class Grid : MonoBehaviour
 {
-    public Map map;
+    public MapGenerator map;
     float nodeRadius;
     Node[,] grid;
     
@@ -113,14 +113,8 @@ public class Grid : BaseObject
 
     public Node NodeFromWorldPoint(Vector3 worldPosition)
     {
-        //float percentX = (worldPosition.x + gridSizeX / 2) / gridSizeX;
-        //float percentY = (worldPosition.y + gridSizeY / 2) / gridSizeY;
         int X = (int)(worldPosition.x) / map.GetSize();
-        int Y= (int)(worldPosition.y) / map.GetSize();
-        //percentX = Mathf.Clamp01(percentX);
-        //percentY = Mathf.Clamp01(percentY);
-        //int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
-        //int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
+        int Y = (int)(worldPosition.y) / map.GetSize();
         return grid[X,Y];
     }
 }

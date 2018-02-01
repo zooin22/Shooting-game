@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Unit : BaseObject
+public class Unit : MonoBehaviour
 {
     const float pathUpdateMoveThreshold = .5f;
     const float minPathUpdateTime = .2f;

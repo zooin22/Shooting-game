@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System;
 
-public class Pathfinding : BaseObject
+public class Pathfinding : MonoBehaviour
 {
 
     Grid grid;
@@ -14,7 +14,7 @@ public class Pathfinding : BaseObject
         grid = GetComponent<Grid>();
     }
 
-    public Vector3[] FindPassage(Coord startCoord , Coord targetCoord)
+    public Vector3[] FindPath(Coord startCoord , Coord targetCoord)
     {
 
         Vector3[] waypoints = new Vector3[0];
@@ -22,7 +22,6 @@ public class Pathfinding : BaseObject
         Node startNode = grid.GetNode(startCoord.tileX,startCoord.tileY);
         Node targetNode = grid.GetNode(targetCoord.tileX, targetCoord.tileY);
         startNode.parent = startNode;
-
 
         if (startNode.tileType == TileType.NONE && targetNode.tileType == TileType.NONE)
         {
@@ -64,7 +63,7 @@ public class Pathfinding : BaseObject
         }
         if (pathSuccess)
         {
-            waypoints = RetracePath(startNode, targetNode);
+            waypoints = RetracePath(startNode, targetNode,true);
             return waypoints;
         }
         return null;
@@ -83,7 +82,7 @@ public class Pathfinding : BaseObject
         Node targetNode = grid.NodeFromWorldPoint(request.pathEnd);
         startNode.parent = startNode;
 
-        if (startNode.tileType == TileType.NONE && targetNode.tileType == TileType.NONE)
+        if (startNode.tileType == TileType.FLOOR && targetNode.tileType == TileType.FLOOR)
         {
             Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
             HashSet<Node> closedSet = new HashSet<Node>();
@@ -102,7 +101,7 @@ public class Pathfinding : BaseObject
                 }
                 foreach (Node neighbour in grid.GetNeighbours(currentNode))
                 {
-                    if (neighbour.tileType != TileType.NONE || closedSet.Contains(neighbour))
+                    if (neighbour.tileType != TileType.FLOOR || closedSet.Contains(neighbour))
                     {
                         continue;
                     }
@@ -124,14 +123,15 @@ public class Pathfinding : BaseObject
         }
         if (pathSuccess)
         {
-            waypoints = RetracePath(startNode, targetNode);
+            waypoints = RetracePath(startNode, targetNode,false);
             pathSuccess = waypoints.Length > 0;
         }
         callback(new PathResult(waypoints, pathSuccess, request.callback));
 
     }
 
-    Vector3[] RetracePath(Node startNode, Node endNode)
+
+    Vector3[] RetracePath(Node startNode, Node endNode,bool isMap)
     {
         List<Node> path = new List<Node>();
         Node currentNode = endNode;
@@ -141,7 +141,8 @@ public class Pathfinding : BaseObject
             path.Add(currentNode);
             currentNode = currentNode.parent;
         }
-        path.Add(startNode);
+        if(isMap)
+            path.Add(startNode);
         Vector3[] waypoints = SimplifyPath(path);
 
         Array.Reverse(waypoints);
@@ -165,31 +166,6 @@ public class Pathfinding : BaseObject
         }
         return waypoints.ToArray();
     }
-
-    //bool CheckNearColl(Node node)
-    //{
-    //    int width = grid.map.GetWidth();
-    //    int height = grid.map.GetHeight();
-    //    Node[,] _grid = grid.map.GetMap();
-    //    for (int x = -1; x <= 1; x++)
-    //    {
-    //        for (int y = -1; y <= 1; y++)
-    //        {
-    //            if (x == 0 && y == 0)
-    //                continue;
-
-    //            int checkX = node.gridX + x;
-    //            int checkY = node.gridY + y;
-
-    //            if (checkX >= 0 && checkX < width && checkY >= 0 && checkY < height)
-    //            {
-    //                if (_grid[checkX, checkY].value == 1)
-    //                    return true;
-    //            }
-    //        }
-    //    }
-    //    return false;
-    //}
 
     int GetDistance(Node nodeA, Node nodeB)
     {

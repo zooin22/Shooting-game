@@ -103,12 +103,11 @@ public class Enemy : Charcter
     {
         Aiming();
         Shot();
+        Action();
     }
-
     private void FixedUpdate()
     {
         Move();
-        Action();
     }
     #endregion
 }

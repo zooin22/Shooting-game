@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Charcter : BaseObject
+public abstract class Charcter : MonoBehaviour
 {
     protected enum State { IDLE, WALK, ROLL, KNOCKBACK, DIE }
     protected enum Direction { LEFT, RIGHT, UP, DOWN, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT }
@@ -15,6 +15,7 @@ public abstract class Charcter : BaseObject
     protected WeaponBag weaponBag;
     protected Weapon weapon;
     protected Vector3 aim;
+    protected Rigidbody2D rigidbody;
 
     public Transform arm;
     public SpriteRenderer gunBody;

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-class BulletWrapper : BaseObject // cBullet 클래스가 Decorator Pattern이라 new 생성자를 사용하는데 Unity의 경우 new 키워드로 인한 생성자는 null을 반납함으로 이를 보완하기 위한 래핑 클래스의 일종
+class BulletWrapper : MonoBehaviour // cBullet 클래스가 Decorator Pattern이라 new 생성자를 사용하는데 Unity의 경우 new 키워드로 인한 생성자는 null을 반납함으로 이를 보완하기 위한 래핑 클래스의 일종
 {
     Bullet bullet;
     SpriteRenderer renderer;

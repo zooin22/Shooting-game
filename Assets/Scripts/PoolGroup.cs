@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum Pool { BULLET, ENEMY }
 
-public class PoolGroup : BaseObject{
+public class PoolGroup : MonoBehaviour{
     public static PoolGroup instance;
 
     public ObjectPool[] objectPool;

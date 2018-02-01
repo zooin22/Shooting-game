@@ -13,7 +13,7 @@ public class Player : Charcter
         state = State.ROLL; // 구르기 상태 
         for (int i = 0; i < 10 ;i++) // 10프레임동안 움직이던 방향으로 구르기
         {
-            transform.position = transform.position + direction*0.1f;
+            rigidbody.velocity = direction*speed*3;
             yield return new WaitForEndOfFrame();
         }
         state = State.IDLE; // Idle 상태 회복
@@ -30,7 +30,7 @@ public class Player : Charcter
             weaponBag.WheelWeapon(false);
         }
     }
-    private IEnumerator KnockBack(Vector2 pushDirection, float knockPower, float knockDur)
+    private IEnumerator KnockBack(Vector2 pushDirection, float knockPower, float knockDur) //일단 enemy랑 중복인데 수정할지도 모름
     {
         this.state = State.KNOCKBACK;
         float timer = 0;
@@ -60,23 +60,27 @@ public class Player : Charcter
     {
         if (State.ROLL == state || State.KNOCKBACK == state) // 넉백, 구르고 있을 시 못 움직임.
             return;
-        lastPosition = transform.position;
-        if (Input.GetKey(KeyCode.W))
-            transform.Translate(Vector3.up * speed * Time.deltaTime);
-        if (Input.GetKey(KeyCode.A))
-            transform.Translate(Vector3.left * speed * Time.deltaTime);
-        if (Input.GetKey(KeyCode.D))
-            transform.Translate(Vector3.right * speed * Time.deltaTime);
-        if (Input.GetKey(KeyCode.S))
-            transform.Translate(Vector3.down * speed * Time.deltaTime);
+        //lastPosition = transform.position;
+        Vector3 movement = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0.0f);
+        rigidbody.velocity = movement * speed;
+        float currentSpeed = rigidbody.velocity.magnitude;
+        //if (Input.GetKey(KeyCode.W))
+        //    transform.Translate(Vector3.up * speed * Time.deltaTime);
+        //if (Input.GetKey(KeyCode.A))
+        //    transform.Translate(Vector3.left * speed * Time.deltaTime);
+        //if (Input.GetKey(KeyCode.D))
+        //    transform.Translate(Vector3.right * speed * Time.deltaTime);
+        //if (Input.GetKey(KeyCode.S))
+        //    transform.Translate(Vector3.down * speed * Time.deltaTime);
         if (Input.GetKeyDown(KeyCode.Space)) // 구르기
         {
             if (state == State.WALK)
-                Roll((transform.position - lastPosition).normalized);
+                Roll(rigidbody.velocity.normalized);
             return;
         }
-        if (lastPosition == transform.position) // 움직이지 않을 시 
+        if (State.ROLL != state && currentSpeed <= 0.3f) // 움직이지 않을 시 
         {
+            //rigidbody.velocity = new Vector3(0, 0, 0);
             state = State.IDLE;
         }
         else
@@ -111,11 +115,12 @@ public class Player : Charcter
     #region UnityFunction
     private void Awake()
     {
-        speed = 2f;
+        speed = 3f;
         state = State.IDLE;
         isAlive = true;
         weaponBag = new WeaponBag(this);
         weapon = weaponBag.Init();
+        rigidbody = GetComponent<Rigidbody2D>();
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -130,11 +135,11 @@ public class Player : Charcter
     {
         Aiming();
         Shot();
+        Action();
     }
     private void FixedUpdate()
-    {
+    {     
         Move();
-        Action();
     }
     #endregion
 }

@@ -6,7 +6,7 @@ using System;
 public enum ItemType { Weapon }
 
 [Serializable]
-public abstract class ItemWrapper : BaseObject // Item Wraaper
+public abstract class ItemWrapper : MonoBehaviour // Item Wraaper
 {
     public Item item;
     public ItemType itemType;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Wall : BaseObject {
+public class Wall : MonoBehaviour {
     public bool reflect;
 	// Use this for initialization
 	void Start () {
