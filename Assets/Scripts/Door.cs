@@ -12,15 +12,19 @@ public class Door : MonoBehaviour {
         {
             case Room.DoorDir.DOWN:
                 transform.rotation = Quaternion.Euler(0, 0, 0);
+                this.GetComponent<Collider2D>().offset = new Vector3(-0.5f, -0.5f);
                 break;
             case Room.DoorDir.UP:
                 transform.rotation = Quaternion.Euler(0, 0, 180);
+                this.GetComponent<Collider2D>().offset = new Vector3(0.5f, 0.5f);
                 break;
             case Room.DoorDir.LEFT:
                 transform.rotation = Quaternion.Euler(0, 0, 90);
+                this.GetComponent<Collider2D>().offset = new Vector3(-0.5f, 0.5f);
                 break;
             case Room.DoorDir.RIGHT:
                 transform.rotation = Quaternion.Euler(0, 0, -90);
+                this.GetComponent<Collider2D>().offset = new Vector3(0.5f, -0.5f);
                 break;
         }
     }

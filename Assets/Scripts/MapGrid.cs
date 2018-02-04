@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Grid : MonoBehaviour
+public class MapGrid : MonoBehaviour
 {
     public MapGenerator map;
     float nodeRadius;
-    Node[,] grid;
-    
+    Node[,] mapGrid;
+
     //float nodeDiameter;
     int gridSizeX, gridSizeY;
 
@@ -22,19 +22,17 @@ public class Grid : MonoBehaviour
     public void CreateGrid()
     {
         nodeRadius = map.GetSize();
-        //nodeDiameter = nodeRadius * 2;
         gridSizeX = map.GetWidth();
         gridSizeY = map.GetHeight();
-        grid = map.GetMap();
+        mapGrid = map.GetMap();
 
-        //Vector3 worldBottomLeft = transform.position;
         for (int x = 0; x < gridSizeX; x++)
         {
             for (int y = 0; y < gridSizeY; y++)
             {
                 Vector3 worldPoint = Vector3.right * (x * nodeRadius) + Vector3.up * (y * nodeRadius);
 
-                grid[x, y].worldPosition = worldPoint;
+                mapGrid[x, y].worldPosition = worldPoint;
             }
         }
     }
@@ -57,19 +55,19 @@ public class Grid : MonoBehaviour
                 {
                     if (x == 1 || x == -1)
                     {
-                        if (grid[checkX, node.gridY].tileType == TileType.EDGE)
+                        if (mapGrid[checkX, node.gridY].tileType == TileType.EDGE)
                         {
                             continue;
                         }
                     }
                     if (y == 1 || y == -1)
                     {
-                        if (grid[node.gridX, checkY].tileType == TileType.EDGE)
+                        if (mapGrid[node.gridX, checkY].tileType == TileType.EDGE)
                         {
                             continue;
                         }
                     }
-                    neighbours.Add(grid[checkX, checkY]);
+                    neighbours.Add(mapGrid[checkX, checkY]);
                 }
             }
         }
@@ -98,7 +96,7 @@ public class Grid : MonoBehaviour
                         continue;
 
                     }
-                    neighbours.Add(grid[checkX, checkY]);
+                    neighbours.Add(mapGrid[checkX, checkY]);
                 }
             }
         }
@@ -108,13 +106,13 @@ public class Grid : MonoBehaviour
 
     public Node GetNode(int x,int y)
     {
-        return grid[x, y];
+        return mapGrid[x, y];
     }
 
     public Node NodeFromWorldPoint(Vector3 worldPosition)
     {
         int X = (int)(worldPosition.x) / map.GetSize();
         int Y = (int)(worldPosition.y) / map.GetSize();
-        return grid[X,Y];
+        return mapGrid[X,Y];
     }
 }

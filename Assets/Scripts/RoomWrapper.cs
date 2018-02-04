@@ -16,9 +16,12 @@ public class RoomWrapper : MonoBehaviour
         enemyCapacity = _enemyCapacity;
         roomSize = enemyCapacity;
     }
-    public void SetDoorList()
+    public bool SetDoorList()
     {
-        doorList = room.CreateDoorObject(this.transform); 
+        doorList = room.CreateDoorObject(this.transform);
+        if (doorList == null)
+            return false;
+        return true;
     }
     public Room GetRoom()
     {

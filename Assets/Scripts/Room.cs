@@ -79,7 +79,11 @@ public class Room
     public List<Door> CreateDoorObject(Transform parent)
     {
         List<Door> doorList = new List<Door>();
-        for(int i = 0; i < doorTiles.Count; i++)
+        if (doorTiles.Count == 0)
+        {
+            return null;
+        }
+        for (int i = 0; i < doorTiles.Count; i++)
         {
             GameObject obj = Object.Instantiate(Resources.Load("Prefabs/Door")) as GameObject;
             obj.transform.parent = parent.transform;

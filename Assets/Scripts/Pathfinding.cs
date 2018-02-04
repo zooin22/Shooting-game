@@ -7,11 +7,11 @@ using System;
 public class Pathfinding : MonoBehaviour
 {
 
-    Grid grid;
+    MapGrid mapGrid;
 
     void Awake()
     {
-        grid = GetComponent<Grid>();
+        mapGrid = GetComponent<MapGrid>();
     }
 
     public Vector3[] FindPath(Coord startCoord , Coord targetCoord)
@@ -19,13 +19,13 @@ public class Pathfinding : MonoBehaviour
 
         Vector3[] waypoints = new Vector3[0];
         bool pathSuccess = false;
-        Node startNode = grid.GetNode(startCoord.tileX,startCoord.tileY);
-        Node targetNode = grid.GetNode(targetCoord.tileX, targetCoord.tileY);
+        Node startNode = mapGrid.GetNode(startCoord.tileX,startCoord.tileY);
+        Node targetNode = mapGrid.GetNode(targetCoord.tileX, targetCoord.tileY);
         startNode.parent = startNode;
 
         if (startNode.tileType == TileType.NONE && targetNode.tileType == TileType.NONE)
         {
-            Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
+            Heap<Node> openSet = new Heap<Node>(mapGrid.MaxSize);
             HashSet<Node> closedSet = new HashSet<Node>();
             openSet.Add(startNode);
 
@@ -38,7 +38,7 @@ public class Pathfinding : MonoBehaviour
                     pathSuccess = true;
                     break;
                 }
-                foreach (Node neighbour in grid.GetPassageNeighbours(currentNode))
+                foreach (Node neighbour in mapGrid.GetPassageNeighbours(currentNode))
                 {
 
                     if (neighbour.tileType != TileType.NONE || closedSet.Contains(neighbour))
@@ -78,13 +78,13 @@ public class Pathfinding : MonoBehaviour
         Vector3[] waypoints = new Vector3[0];
         bool pathSuccess = false;
 
-        Node startNode = grid.NodeFromWorldPoint(request.pathStart);
-        Node targetNode = grid.NodeFromWorldPoint(request.pathEnd);
+        Node startNode = mapGrid.NodeFromWorldPoint(request.pathStart);
+        Node targetNode = mapGrid.NodeFromWorldPoint(request.pathEnd);
         startNode.parent = startNode;
 
         if (startNode.tileType == TileType.FLOOR && targetNode.tileType == TileType.FLOOR)
         {
-            Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
+            Heap<Node> openSet = new Heap<Node>(mapGrid.MaxSize);
             HashSet<Node> closedSet = new HashSet<Node>();
             openSet.Add(startNode);
 
@@ -99,7 +99,7 @@ public class Pathfinding : MonoBehaviour
                     pathSuccess = true;
                     break;
                 }
-                foreach (Node neighbour in grid.GetNeighbours(currentNode))
+                foreach (Node neighbour in mapGrid.GetNeighbours(currentNode))
                 {
                     if (neighbour.tileType != TileType.FLOOR || closedSet.Contains(neighbour))
                     {

@@ -230,13 +230,13 @@
     <Compile Include="Assets\Scripts\EnemyManager.cs" />
     <Compile Include="Assets\Scripts\EnemyMoveMode.cs" />
     <Compile Include="Assets\Scripts\EnemyState.cs" />
-    <Compile Include="Assets\Scripts\Grid.cs" />
     <Compile Include="Assets\Scripts\Heap.cs" />
     <Compile Include="Assets\Scripts\Item.cs" />
     <Compile Include="Assets\Scripts\ItemBag.cs" />
     <Compile Include="Assets\Scripts\ItemWrapper.cs" />
     <Compile Include="Assets\Scripts\JsonManager.cs" />
     <Compile Include="Assets\Scripts\MapGenerator.cs" />
+    <Compile Include="Assets\Scripts\MapGrid.cs" />
     <Compile Include="Assets\Scripts\MeshGenerator.cs" />
     <Compile Include="Assets\Scripts\MouseEvent.cs" />
     <Compile Include="Assets\Scripts\Node.cs" />
@@ -249,6 +249,7 @@
     <Compile Include="Assets\Scripts\Room.cs" />
     <Compile Include="Assets\Scripts\RoomWrapper.cs" />
     <Compile Include="Assets\Scripts\ShotMode.cs" />
+    <Compile Include="Assets\Scripts\TileMapGenerator.cs" />
     <Compile Include="Assets\Scripts\Unit.cs" />
     <Compile Include="Assets\Scripts\Wall.cs" />
     <Compile Include="Assets\Scripts\Weapon.cs" />

@@ -10,9 +10,9 @@ public class MapGenerator : MonoBehaviour
     public int count;
     int height;
     int  width;
-    public Grid grid;
+    public MapGrid mapGrid;
     public Transform Rooms;
-    int size = 2;
+    int size = 1;
 
     List<RoomWrapper> roomList;
 
@@ -105,11 +105,12 @@ public class MapGenerator : MonoBehaviour
             Debug.Log("Generate Map");
 
             InitMap();
-            grid.CreateGrid();
+            mapGrid.CreateGrid();
             List<Room> room = SeparateMap(count, 0, 0, width, height);
             if (room != null)
             {
-                meshGen.GenerateMesh(map, size);
+                //meshGen.GenerateMesh(map, size);
+                TileMapGenerator.GetInstance().CreateTileMap(map);
                 process = false;
                 isCreated = true;
                 SetRoomObject();
@@ -125,6 +126,7 @@ public class MapGenerator : MonoBehaviour
 
     private void InitMap()
     {
+        roomList.Clear();
         for(int i = 0; i < width; i++)
         {
             for(int j = 0; j < height; j++)
@@ -134,12 +136,16 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    private void SetRoomObject()
+    private bool SetRoomObject()
     {
+        bool success = true;
         for (int i = 0; i < roomList.Count; i++)
         {
-            roomList[i].SetDoorList();
+            success = roomList[i].SetDoorList();
+            if (!success)
+                return true;
         }
+        return false;
     }
 
     private List<Room> SeparateMap(int count, int x1, int y1, int x2, int y2)
@@ -259,8 +265,6 @@ public class MapGenerator : MonoBehaviour
             { 
                 if (i == left || i == right - 1 || j == down || j == top - 1) // 경계 테두리를 채움
                 {
-                    if ((i == left || i == right - 1) && (j == down || j == top - 1)) // 구석은 채우지 않음.
-                        continue;
                     map[i, j].tileType = TileType.EDGE;
                     edgeTiles.Add(new Coord(i, j));
                 }
