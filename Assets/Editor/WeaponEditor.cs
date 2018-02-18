@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
-using UnityEditor;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class WeaponEditor : EditorWindow {
 

@@ -4,16 +4,18 @@ using UnityEngine;
 
 public class Player : Charcter
 {
+    private float rollCooldown;
+
     private void Roll(Vector3 direction)
     {
         StartCoroutine(RollRoutine(direction));
     } // 구르기
     IEnumerator RollRoutine(Vector3 direction) 
     {
-        state = State.ROLL; // 구르기 상태 
+        state = State.DASH; // 구르기 상태 
         for (int i = 0; i < 10 ;i++) // 10프레임동안 움직이던 방향으로 구르기
         {
-            rigidbody.velocity = direction*speed*3;
+            rb.velocity = direction*speed*3;
             yield return new WaitForEndOfFrame();
         }
         state = State.IDLE; // Idle 상태 회복
@@ -58,34 +60,36 @@ public class Player : Charcter
     } 
     protected override void Move()
     {
-        if (State.ROLL == state || State.KNOCKBACK == state) // 넉백, 구르고 있을 시 못 움직임.
+        if (State.DASH == state || State.KNOCKBACK == state) // 넉백, 구르고 있을 시 못 움직임.
             return;
-        //lastPosition = transform.position;
-        Vector3 movement = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0.0f);
-        rigidbody.velocity = movement * speed;
-        float currentSpeed = rigidbody.velocity.magnitude;
-        //if (Input.GetKey(KeyCode.W))
-        //    transform.Translate(Vector3.up * speed * Time.deltaTime);
-        //if (Input.GetKey(KeyCode.A))
-        //    transform.Translate(Vector3.left * speed * Time.deltaTime);
-        //if (Input.GetKey(KeyCode.D))
-        //    transform.Translate(Vector3.right * speed * Time.deltaTime);
-        //if (Input.GetKey(KeyCode.S))
-        //    transform.Translate(Vector3.down * speed * Time.deltaTime);
-        if (Input.GetKeyDown(KeyCode.Space)) // 구르기
+        Vector3 movement = Vector3.zero;
+
+        if (Input.GetKey(KeyCode.A))
+            movement += Vector3Int.left;
+        if (Input.GetKey(KeyCode.D))
+            movement += Vector3Int.right;
+        if (Input.GetKey(KeyCode.W))
+            movement += Vector3Int.up;
+        if (Input.GetKey(KeyCode.S))
+            movement += Vector3Int.down;
+
+        rb.velocity = Vector3.ClampMagnitude(movement, 1f) * speed;
+
+        if (movement.magnitude > 0f)
         {
-            if (state == State.WALK)
-                Roll(rigidbody.velocity.normalized);
-            return;
+            aim = movement;
         }
-        if (State.ROLL != state && currentSpeed <= 0.3f) // 움직이지 않을 시 
+
+        rollCooldown = Mathf.MoveTowards(rollCooldown, 0f, Time.deltaTime);
+
+        if (Input.GetButtonDown("Jump")) // 구르기
         {
-            //rigidbody.velocity = new Vector3(0, 0, 0);
-            state = State.IDLE;
-        }
-        else
-        {
-            state = State.WALK;
+            if (rollCooldown <= 0f && movement.magnitude > 0)
+            {
+                Roll(aim);
+                rollCooldown = 1f;
+                return;
+            }
         }
     } 
     protected override void Action()
@@ -96,7 +100,7 @@ public class Player : Charcter
     } 
     protected override void Shot() 
     {
-        if (State.ROLL == state || weapon.GetGunState() == GunState.RELOAD) // 구르고 있을 시, 재장전 시 발사 안됨.
+        if (State.DASH == state || weapon.GetGunState() == GunState.RELOAD) // 구르고 있을 시, 재장전 시 발사 안됨.
             return;
         if (Input.GetMouseButton(0)) // 왼쪽 다운
         {
@@ -113,22 +117,21 @@ public class Player : Charcter
     }
     #endregion
     #region UnityFunction
-    private void Awake()
+    private void Start()
     {
         speed = 3f;
         state = State.IDLE;
-        isAlive = true;
         weaponBag = new WeaponBag(this);
         weapon = weaponBag.Init();
-        rigidbody = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
     }
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (collision.CompareTag("Item"))
+        if (other.gameObject.layer == LayerMask.NameToLayer("Item"))
         {
-            Weapon item = collision.GetComponent<WeaponItemWrapper>().PickItem() as Weapon;
+            Weapon item = other.GetComponent<WeaponItemWrapper>().PickItem() as Weapon;
             weaponBag.Add(item);
-            Destroy(collision.gameObject);
+            Destroy(other.gameObject);
         }
     }
     private void Update()

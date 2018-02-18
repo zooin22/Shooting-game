@@ -219,6 +219,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Map.cs" />
+    <Compile Include="Assets\RoomWrap.cs" />
     <Compile Include="Assets\Scripts\Bullet.cs" />
     <Compile Include="Assets\Scripts\BulletCal.cs" />
     <Compile Include="Assets\Scripts\BulletProperty.cs" />
@@ -255,6 +257,11 @@
     <Compile Include="Assets\Scripts\Weapon.cs" />
     <Compile Include="Assets\Scripts\WeaponBag.cs" />
     <Compile Include="Assets\Scripts\WeaponState.cs" />
+    <Compile Include="Assets\TileManager.cs" />
+    <Compile Include="Assets\Tiles\Scripts\DoorTile.cs" />
+    <Compile Include="Assets\Tiles\Scripts\ObjectTile.cs" />
+    <Compile Include="Assets\Tiles\Scripts\RandomTile.cs" />
+    <Compile Include="Assets\Tiles\Scripts\RuleTile.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

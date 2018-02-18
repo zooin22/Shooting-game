@@ -6,8 +6,14 @@ public class CoroutineManager : MonoBehaviour {
     public static CoroutineManager instance;
     IEnumerator reloadRoutine;
     // Use this for initialization
-    void Start () {
-        instance = this;
+    public static CoroutineManager GetInstance()
+    {
+        if (!instance)
+        {
+            instance = GameObject.FindObjectOfType(typeof(CoroutineManager)) as CoroutineManager;
+        }
+
+        return instance;
     }
 
     public void RateOfFire(Weapon weapon) // 리로드 코루틴을 위한 함수 코루틴의 겨우 ref와 out을 허락하지 않으므로 class값을 넘겨 레퍼런스를 받음

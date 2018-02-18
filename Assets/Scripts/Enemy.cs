@@ -11,7 +11,7 @@ public class Enemy : Charcter
 
     public void Init(Sprite sprite, Weapon weapon, Transform target, int hp, float speed, EnemyState.EEnemyMoveMode eEnemyMoveMode)
     {
-        this.GetComponent<Unit>().Init(target,speed);
+        //this.GetComponent<Unit>().Init(target,speed);
         this.GetComponent<SpriteRenderer>().sprite = sprite;
         this.target = target;
         this.hp = hp;
@@ -21,7 +21,7 @@ public class Enemy : Charcter
         weaponBag.Add(weapon);
         weaponBag.WheelWeapon(false);
         enemyMoveMode = EnemyState.GetEnemyMoveMode(eEnemyMoveMode);
-        isAlive = true;
+        state = State.IDLE;
         isMoving = true;
     }
     private void Remove() // 게임 풀 오브젝트 false
@@ -74,7 +74,7 @@ public class Enemy : Charcter
     }
     protected override void Move()
     {
-        if (!isMoving || State.ROLL == state || State.KNOCKBACK == state)
+        if (!isMoving || State.DASH == state || State.KNOCKBACK == state)
         {
             enemyMoveMode.Stop(this);
             return;
@@ -93,7 +93,6 @@ public class Enemy : Charcter
     }
     protected override void Death()
     {
-        isAlive = false;
         Remove();
         Debug.Log("DeatH");
     }

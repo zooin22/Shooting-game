@@ -4,18 +4,19 @@ using UnityEngine;
 
 public abstract class Charcter : MonoBehaviour
 {
-    protected enum State { IDLE, WALK, ROLL, KNOCKBACK, DIE }
+    protected enum State { IDLE, DASH, KNOCKBACK, DEAD }
     protected enum Direction { LEFT, RIGHT, UP, DOWN, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT }
     protected float speed;
     protected int maxHp;
     protected int hp;
-    protected bool isAlive;
     protected State state;
     protected Vector3 lastPosition;
     protected WeaponBag weaponBag;
     protected Weapon weapon;
     protected Vector3 aim;
-    protected Rigidbody2D rigidbody;
+    protected Rigidbody2D rb;
+    protected Animator animator;
+    protected AudioSource audioSource;
 
     public Transform arm;
     public SpriteRenderer gunBody;

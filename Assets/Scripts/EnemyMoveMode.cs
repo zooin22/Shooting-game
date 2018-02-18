@@ -13,12 +13,12 @@ public class SimpleMoveMode : EnemyMoveMode
 {
     public override void Move(Enemy enemy, Transform transform, Transform target, float speed)
     {
-        enemy.GetComponent<Unit>().UpdatedPath();
+        //enemy.GetComponent<Unit>().UpdatedPath();
         //transform.Translate((target.position - transform.position).normalized * Time.deltaTime * speed);
     }
     public override void Stop(Enemy enemy)
     {
-        enemy.GetComponent<Unit>().StopMove();
+        //enemy.GetComponent<Unit>().StopMove();
     }
 }
 
