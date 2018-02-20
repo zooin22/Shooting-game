@@ -279,8 +279,8 @@
     <Compile Include="Assets\Brush\Scripts\Editor\CoordinateBrush.cs" />
     <Compile Include="Assets\Brush\Scripts\Editor\ObjectBrush.cs" />
     <Compile Include="Assets\Editor\EnemyEditor.cs" />
-    <Compile Include="Assets\Editor\MapEditor.cs" />
     <Compile Include="Assets\Editor\WeaponEditor.cs" />
+    <Compile Include="Assets\Map\Editor\MapEditor.cs" />
     <Compile Include="Assets\Rule Tile\Scripts\Editor\RuleTileEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
